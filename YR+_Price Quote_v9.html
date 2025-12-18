@@ -1,0 +1,776 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>優潤家包租裝修報價單 v9 (功能完整版)</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --accent-color: #8e44ad; /* 改為紫色系 v9 */
+            --bg-color: #f8f9fa;
+            --border-color: #dee2e6;
+            --input-bg: #fff;
+            --driver-bg: #fff3e0;
+            --driver-border: #ffb74d;
+            --auto-bg: #e8f5e9;
+            --auto-text: #2e7d32;
+        }
+
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Microsoft JhengHei", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: var(--bg-color);
+            color: #333;
+            line-height: 1.5;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 25px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            border-radius: 10px;
+        }
+
+        h1, h2 {
+            color: var(--primary-color);
+            border-bottom: 2px solid var(--accent-color);
+            padding-bottom: 10px;
+        }
+
+        h1 { text-align: center; margin-bottom: 30px; font-size: 1.8rem; }
+        h2 { margin-top: 40px; font-size: 1.4rem; }
+        
+        /* --- Grid System --- */
+        .basic-info-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            background: #eef2f5;
+            padding: 25px;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+            align-items: end; /* 讓按鈕靠下對齊 */
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+        }
+
+        .form-group label {
+            font-weight: bold;
+            font-size: 0.9rem;
+            margin-bottom: 6px;
+            color: #555;
+        }
+
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 1rem;
+            transition: border-color 0.2s;
+        }
+
+        .form-group input:focus, .form-group select:focus {
+            border-color: var(--accent-color);
+            outline: none;
+        }
+
+        .form-group.full-width { grid-column: span 4; }
+        .form-group.span-2 { grid-column: span 2; }
+        
+        .layout-inputs {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        .layout-inputs div {
+            flex: 1;
+            min-width: 100px;
+            display: flex;
+            align-items: center;
+        }
+        .layout-inputs label {
+            margin-right: 8px;
+            margin-bottom: 0;
+            white-space: nowrap;
+        }
+
+        /* --- Action Area (Buttons & Quick Total) --- */
+        .action-area {
+            grid-column: span 4;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 10px;
+            padding-top: 15px;
+            border-top: 1px solid #ccc;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            color: white;
+            transition: opacity 0.2s;
+            font-size: 0.9rem;
+        }
+        .btn:hover { opacity: 0.9; }
+        
+        .btn-print { background-color: #34495e; }
+        .btn-export { background-color: #27ae60; }
+        .btn-import { background-color: #e67e22; }
+
+        .quick-total-display {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #d35400;
+        }
+        .quick-total-label {
+            font-size: 1rem;
+            color: #555;
+            margin-right: 10px;
+        }
+
+        /* --- Table Styling --- */
+        .table-responsive {
+            width: 100%;
+            overflow-x: auto;
+            margin-bottom: 30px;
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 700px;
+        }
+
+        th, td {
+            border: 1px solid var(--border-color);
+            padding: 12px 10px;
+            vertical-align: middle;
+        }
+
+        th {
+            background-color: var(--primary-color);
+            color: white !important;
+            text-align: center !important;
+            font-weight: 500;
+            white-space: nowrap;
+        }
+
+        .col-item { min-width: 120px; }
+        .col-num { width: 90px; text-align: center; }
+        .col-unit { width: 70px; text-align: center; }
+        .col-price { width: 130px; text-align: right; }
+        .col-total { width: 140px; text-align: right; font-weight: bold; }
+        .col-remark { min-width: 180px; }
+        
+        td.col-total { background-color: #f8f9fa; }
+        td.col-remark { color: #666; font-size: 0.9rem; }
+
+        input.qty-input, input.price-input {
+            width: 100%;
+            padding: 6px;
+            text-align: right;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        
+        input.auto-calc {
+            background-color: var(--auto-bg);
+            color: var(--auto-text);
+            font-weight: bold;
+            border: 1px solid #c8e6c9;
+            cursor: not-allowed;
+        }
+        
+        .input-driver {
+            background-color: var(--driver-bg);
+            border-color: var(--driver-border) !important;
+        }
+
+        /* --- Summary Section --- */
+        .summary-section {
+            background-color: #fff8e1;
+            padding: 25px;
+            border-radius: 8px;
+            border: 1px solid #ffe0b2;
+            margin-top: 20px;
+        }
+
+        .summary-row {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            margin-bottom: 12px;
+            font-size: 1.1em;
+            flex-wrap: wrap;
+        }
+
+        .summary-row label {
+            margin-right: 15px;
+            font-weight: bold;
+            color: #555;
+            text-align: right;
+        }
+
+        .summary-row span, .summary-row input, .summary-row select {
+            width: 180px;
+            text-align: right;
+            font-weight: bold;
+            padding: 6px;
+        }
+
+        .total-final {
+            font-size: 1.6em;
+            color: #d35400;
+            border-top: 2px solid #333;
+            padding-top: 15px;
+            margin-top: 15px;
+        }
+
+        /* --- Print Styles --- */
+        @media print {
+            .no-print { display: none !important; }
+            body { background-color: white; padding: 0; }
+            .container { box-shadow: none; border: none; max-width: 100%; padding: 0; }
+            .basic-info-grid { background: none; border: 1px solid #ccc; }
+            .summary-section { background: none; border: 1px solid #ccc; }
+            
+            /* 強制列印背景色 (Chrome/Edge) */
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+
+        /* --- Media Queries --- */
+        @media (max-width: 992px) {
+            .basic-info-grid { grid-template-columns: repeat(2, 1fr); }
+            .form-group.full-width { grid-column: span 2; }
+            .action-area { grid-column: span 2; flex-direction: column-reverse; align-items: flex-end; }
+        }
+
+        @media (max-width: 600px) {
+            .container { padding: 15px; }
+            .basic-info-grid { grid-template-columns: 1fr; padding: 15px; }
+            .form-group.full-width { grid-column: span 1; }
+            .form-group.span-2 { grid-column: span 1; }
+            .action-area { grid-column: span 1; }
+            .summary-row { justify-content: space-between; }
+            .summary-row label { text-align: left; margin-right: 0; flex: 1; }
+            .summary-row span, .summary-row select { width: auto; min-width: 120px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1 class="no-print">優潤家包租裝修報價單  v9</h1>
+    <h1 style="display:none;" class="print-only">房屋裝修報價單</h1>
+
+    <h2>基本資料 (連動控制區)</h2>
+    <div class="basic-info-grid">
+        <div class="form-group full-width">
+            <label>地址</label>
+            <input type="text" id="info-address" value="大同區太原路115巷21號5樓" 
+                   style="color: #aaa;" 
+                   oninput="this.style.color='#333'">
+        </div>
+
+        <div class="form-group">
+            <label>型態</label>
+            <select id="info-type">
+                <option value="公寓" selected>公寓</option>
+                <option value="華廈">華廈</option>
+                <option value="電梯社區">電梯社區</option>
+                <option value="透天">透天</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>樓層</label>
+            <input type="text" id="info-floor" value="5">
+        </div>
+
+        <div class="form-group">
+            <label>實際坪數 (連動油漆/地板)</label>
+            <input type="number" id="info-ping" value="27" oninput="syncLogic()">
+        </div>
+
+        <div class="form-group"></div>
+
+        <div class="form-group full-width" style="border-top: 1px dashed #ccc; padding-top: 15px; margin-top: 5px;">
+            <label>原有格局 (房/廳/衛/陽)</label>
+            <div class="layout-inputs">
+                <div><label>房:</label> <input type="number" id="info-room" value="3" oninput="syncLogic()"></div>
+                <div><label>廳:</label> <input type="number" id="info-hall" value="1" oninput="syncLogic()"></div>
+                <div><label>衛:</label> <input type="number" id="info-bath" value="1" oninput="syncLogic()"></div>
+                <div><label>陽:</label> <input type="number" id="info-balcony" value="1" oninput="syncLogic()"></div>
+            </div>
+        </div>
+
+        <div class="form-group span-2">
+            <label>增加房間數 (連動隔間/冷氣/油漆)</label>
+            <input type="number" id="info-add-room" class="input-driver" value="0" oninput="syncLogic()">
+        </div>
+
+        <div class="form-group span-2">
+            <label>增加迴路 (連動水電)</label>
+            <input type="number" id="info-add-circuit" class="input-driver" value="1" oninput="syncLogic()">
+        </div>
+
+        <div class="action-area">
+            <div class="btn-group no-print">
+                <button class="btn btn-print" onclick="window.print()">🖨️ 列印 / 存PDF</button>
+                <button class="btn btn-export" onclick="exportData()">💾 匯出參數</button>
+                <button class="btn btn-import" onclick="triggerImport()">📂 匯入參數</button>
+                <input type="file" id="file-input" style="display: none;" onchange="importData(this)">
+            </div>
+            <div>
+                <span class="quick-total-label">預估總費用(含稅)：</span>
+                <span id="quick-total" class="quick-total-display">0</span>
+            </div>
+        </div>
+    </div>
+
+    <h2>A. 家配報價</h2>
+    <div class="table-responsive">
+        <table id="table-furniture">
+            <thead>
+                <tr>
+                    <th class="col-item">項目</th>
+                    <th class="col-num">數量</th>
+                    <th class="col-unit">單位</th>
+                    <th class="col-price">單價</th>
+                    <th class="col-total">複價</th>
+                    <th class="col-remark">備註 (內容物)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>房間家具</td>
+                    <td><input type="number" id="qty-room" class="qty-input auto-calc" value="3" oninput="calculate()"></td>
+                    <td>房</td>
+                    <td><input type="number" class="price-input" value="30000" oninput="calculate()"></td>
+                    <td class="col-total row-total">0</td>
+                    <td class="col-remark">原有房間 + 新增房間</td>
+                </tr>
+                <tr>
+                    <td>客廳家具</td>
+                    <td><input type="number" id="qty-hall" class="qty-input auto-calc" value="1" oninput="calculate()"></td>
+                    <td>廳</td>
+                    <td><input type="number" class="price-input" value="20000" oninput="calculate()"></td>
+                    <td class="col-total row-total">0</td>
+                    <td class="col-remark">沙發、茶几、鞋櫃、餐桌、燈具</td>
+                </tr>
+                <tr>
+                    <td>廚房家電</td>
+                    <td><input type="number" class="qty-input" value="1" oninput="calculate()"></td>
+                    <td>房</td>
+                    <td><input type="number" class="price-input" value="40000" oninput="calculate()"></td>
+                    <td class="col-total row-total">0</td>
+                    <td class="col-remark">冰箱、電器櫃、下櫥櫃、IH爐、微波爐</td>
+                </tr>
+                <tr>
+                    <td>陽台家電</td>
+                    <td><input type="number" id="qty-balcony" class="qty-input auto-calc" value="1" oninput="calculate()"></td>
+                    <td>陽台</td>
+                    <td><input type="number" class="price-input" value="25000" oninput="calculate()"></td>
+                    <td class="col-total row-total">0</td>
+                    <td class="col-remark">洗衣機、烘衣機、電熱水器、曬衣桿</td>
+                </tr>
+                <tr>
+                    <td>浴室整理</td>
+                    <td><input type="number" id="qty-bath" class="qty-input auto-calc" value="1" oninput="calculate()"></td>
+                    <td>衛</td>
+                    <td><input type="number" class="price-input" value="20000" oninput="calculate()"></td>
+                    <td class="col-total row-total">0</td>
+                    <td class="col-remark">防水處理、五金、吸頂燈更換</td>
+                </tr>
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="4" style="text-align: right; font-weight: bold;">家配小計：</td>
+                    <td id="subtotal-furniture" style="text-align: right; font-weight: bold;">0</td>
+                    <td></td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+
+    <h2>B. 工種報價</h2>
+    <div class="table-responsive">
+        <table id="table-construction">
+            <thead>
+                <tr>
+                    <th class="col-item">項目</th>
+                    <th class="col-num">數量</th>
+                    <th class="col-unit">單位</th>
+                    <th class="col-price">單價</th>
+                    <th class="col-total">複價</th>
+                    <th class="col-remark">備註 (規格)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>清運拆除</td>
+                    <td><input type="number" class="qty-input" value="1" oninput="calculate()"></td>
+                    <td>式</td>
+                    <td><input type="number" class="price-input" value="20000" oninput="calculate()"></td>
+                    <td class="col-total row-total">0</td>
+                    <td class="col-remark">2人*2天+1車，保護、垃圾清運</td>
+                </tr>
+                <tr>
+                    <td>隔間工程</td>
+                    <td><input type="number" id="qty-partition" class="qty-input auto-calc" value="0" oninput="calculate()"></td>
+                    <td>間</td>
+                    <td><input type="number" class="price-input" value="50000" oninput="calculate()"></td>
+                    <td class="col-total row-total">0</td>
+                    <td class="col-remark">連動：增加房間數</td>
+                </tr>
+                <tr>
+                    <td>水電工程</td>
+                    <td><input type="number" id="qty-wiring" class="qty-input auto-calc" value="7" oninput="calculate()"></td>
+                    <td>迴</td>
+                    <td><input type="number" class="price-input" value="5000" oninput="calculate()"></td>
+                    <td class="col-total row-total">0</td>
+                    <td class="col-remark">公式：(總房間+廳+衛+陽) + 增加迴路</td>
+                </tr>
+                <tr>
+                    <td>油漆工程</td>
+                    <td><input type="number" id="qty-paint" class="qty-input auto-calc" value="81" oninput="calculate()"></td>
+                    <td>坪</td>
+                    <td><input type="number" class="price-input" value="800" oninput="calculate()"></td>
+                    <td class="col-total row-total">0</td>
+                    <td class="col-remark">公式：坪數 x (3 + 新增隔間數)</td>
+                </tr>
+                <tr>
+                    <td>地板工程</td>
+                    <td><input type="number" id="qty-floor" class="qty-input auto-calc" value="25" oninput="calculate()"></td>
+                    <td>坪</td>
+                    <td><input type="number" class="price-input" value="1800" oninput="calculate()"></td>
+                    <td class="col-total row-total">0</td>
+                    <td class="col-remark">公式：坪數 - (衛+陽)</td>
+                </tr>
+                <tr>
+                    <td>新增冷氣</td>
+                    <td><input type="number" id="qty-ac-new" class="qty-input auto-calc" value="0" oninput="calculate()"></td>
+                    <td>台</td>
+                    <td><input type="number" class="price-input" value="25000" oninput="calculate()"></td>
+                    <td class="col-total row-total">0</td>
+                    <td class="col-remark">連動：增加房間數 (一級變頻冷暖)</td>
+                </tr>
+                <tr>
+                    <td>保養冷氣</td>
+                    <td><input type="number" id="qty-ac-maint" class="qty-input auto-calc" value="3" oninput="calculate()"></td>
+                    <td>台</td>
+                    <td><input type="number" class="price-input" value="2500" oninput="calculate()"></td>
+                    <td class="col-total row-total">0</td>
+                    <td class="col-remark">連動：原有房間數</td>
+                </tr>
+                <tr>
+                    <td>細部清潔</td>
+                    <td><input type="number" id="qty-clean" class="qty-input" value="27" oninput="calculate()"></td>
+                    <td>坪</td>
+                    <td><input type="number" class="price-input" value="300" oninput="calculate()"></td>
+                    <td class="col-total row-total">0</td>
+                    <td class="col-remark">全室細清</td>
+                </tr>
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="4" style="text-align: right; font-weight: bold;">工種小計：</td>
+                    <td id="subtotal-construction" style="text-align: right; font-weight: bold;">0</td>
+                    <td></td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+
+    <h2>C. 費用報價</h2>
+    <div class="table-responsive">
+        <table id="table-fees">
+            <thead>
+                <tr>
+                    <th class="col-item">項目</th>
+                    <th class="col-num">數量</th>
+                    <th class="col-unit">單位</th>
+                    <th class="col-price">單價</th>
+                    <th class="col-total">複價</th>
+                    <th class="col-remark">備註</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>空間設計費</td>
+                    <td><input type="number" class="qty-input" value="1" oninput="calculate()"></td>
+                    <td>式</td>
+                    <td><input type="number" class="price-input" value="6000" oninput="calculate()"></td>
+                    <td class="col-total row-total">0</td>
+                    <td class="col-remark">格局規劃、軟裝搭配建議</td>
+                </tr>
+                <tr>
+                    <td>雜費</td>
+                    <td><input type="number" class="qty-input" value="1" oninput="calculate()"></td>
+                    <td>式</td>
+                    <td><input type="number" class="price-input" value="30000" oninput="calculate()"></td>
+                    <td class="col-total row-total">0</td>
+                    <td class="col-remark">電子鎖、其他五金耗材</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="summary-section">
+        <div class="summary-row">
+            <label>A + B 工程軟裝總和：</label>
+            <span id="sum-ab">0</span>
+        </div>
+        
+        <div class="summary-row">
+            <label>工程管理費率：</label>
+            <select id="mgmt-rate" class="dropdown-select" onchange="calculate()">
+                <option value="0.05">5%</option>
+                <option value="0.08">8%</option>
+                <option value="0.10" selected>10%</option>
+                <option value="0.12">12%</option>
+                <option value="0.15">15%</option>
+                <option value="0">不收</option>
+            </select>
+        </div>
+        <div class="summary-row">
+            <label>工程管理費金額：</label>
+            <span id="mgmt-fee">0</span>
+        </div>
+        
+        <div class="summary-row">
+            <label>C. 設計與雜費：</label>
+            <span id="sum-c">0</span>
+        </div>
+
+        <hr style="border-color: #aaa; margin: 15px 0;">
+
+        <div class="summary-row">
+            <label>未稅合計：</label>
+            <span id="total-pretax">0</span>
+        </div>
+
+        <div class="summary-row">
+            <label>發票稅率：</label>
+            <select id="tax-rate" class="dropdown-select" onchange="calculate()">
+                <option value="0.05" selected>5% (含稅)</option>
+                <option value="0">0% (未稅)</option>
+            </select>
+        </div>
+        
+        <div class="summary-row">
+            <label>稅金：</label>
+            <span id="tax-amount">0</span>
+        </div>
+
+        <div class="summary-row total-final">
+            <label>總費用 (含稅)：</label>
+            <span id="grand-total">0</span>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    function formatNumber(num) {
+        return num.toLocaleString('zh-TW', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+    }
+
+    function parseInput(val) {
+        return parseFloat(val) || 0;
+    }
+
+    function syncLogic() {
+        const ping = parseInput(document.getElementById('info-ping').value);
+        const origRoom = parseInput(document.getElementById('info-room').value); 
+        const hall = parseInput(document.getElementById('info-hall').value);
+        const bath = parseInput(document.getElementById('info-bath').value);
+        const balcony = parseInput(document.getElementById('info-balcony').value);
+        
+        const addRoom = parseInput(document.getElementById('info-add-room').value);
+        const addCircuit = parseInput(document.getElementById('info-add-circuit').value);
+
+        const totalRoom = origRoom + addRoom;
+
+        // 家配
+        document.getElementById('qty-room').value = totalRoom;
+        document.getElementById('qty-hall').value = hall;
+        document.getElementById('qty-bath').value = bath;
+        document.getElementById('qty-balcony').value = balcony;
+
+        // 工種
+        document.getElementById('qty-partition').value = addRoom;
+        
+        const totalSpaces = totalRoom + hall + bath + balcony;
+        document.getElementById('qty-wiring').value = totalSpaces + addCircuit;
+
+        // 油漆公式 = 坪數 * (3 + 新增隔間數)
+        document.getElementById('qty-paint').value = ping * (3 + addRoom);
+
+        let floorQty = ping - bath - balcony;
+        if(floorQty < 0) floorQty = 0;
+        document.getElementById('qty-floor').value = floorQty;
+
+        document.getElementById('qty-ac-new').value = addRoom;
+        document.getElementById('qty-ac-maint').value = origRoom;
+        document.getElementById('qty-clean').value = ping;
+
+        calculate();
+    }
+
+    function calculateTable(tableId) {
+        const table = document.getElementById(tableId);
+        const rows = table.querySelectorAll('tbody tr');
+        let tableSum = 0;
+
+        rows.forEach(row => {
+            const qtyInput = row.querySelector('.qty-input');
+            const priceInput = row.querySelector('.price-input');
+            
+            if(qtyInput && priceInput) {
+                const qty = parseInput(qtyInput.value);
+                const price = parseInput(priceInput.value);
+                const total = qty * price;
+                
+                row.querySelector('.row-total').textContent = formatNumber(total);
+                tableSum += total;
+            }
+        });
+
+        return tableSum;
+    }
+
+    function calculate() {
+        const subFurniture = calculateTable('table-furniture');
+        const subConstruction = calculateTable('table-construction');
+        const subFeesMisc = calculateTable('table-fees'); 
+
+        document.getElementById('subtotal-furniture').textContent = formatNumber(subFurniture);
+        document.getElementById('subtotal-construction').textContent = formatNumber(subConstruction);
+        document.getElementById('sum-ab').textContent = formatNumber(subFurniture + subConstruction);
+
+        const sumAB = subFurniture + subConstruction;
+        const mgmtRate = parseFloat(document.getElementById('mgmt-rate').value);
+        const mgmtFee = Math.round(sumAB * mgmtRate);
+        
+        document.getElementById('mgmt-fee').textContent = formatNumber(mgmtFee);
+        document.getElementById('sum-c').textContent = formatNumber(subFeesMisc);
+
+        const totalPreTax = sumAB + mgmtFee + subFeesMisc;
+        document.getElementById('total-pretax').textContent = formatNumber(totalPreTax);
+
+        const taxRate = parseFloat(document.getElementById('tax-rate').value);
+        const taxAmount = Math.round(totalPreTax * taxRate);
+        document.getElementById('tax-amount').textContent = formatNumber(taxAmount);
+
+        const grandTotal = totalPreTax + taxAmount;
+        const grandTotalStr = "NT$ " + formatNumber(grandTotal);
+        
+        document.getElementById('grand-total').textContent = grandTotalStr;
+        
+        // 更新上方快速總價
+        document.getElementById('quick-total').textContent = grandTotalStr;
+    }
+
+    // --- 匯出功能 ---
+    function exportData() {
+        const data = {
+            address: document.getElementById('info-address').value,
+            type: document.getElementById('info-type').value,
+            floor: document.getElementById('info-floor').value,
+            ping: document.getElementById('info-ping').value,
+            room: document.getElementById('info-room').value,
+            hall: document.getElementById('info-hall').value,
+            bath: document.getElementById('info-bath').value,
+            balcony: document.getElementById('info-balcony').value,
+            addRoom: document.getElementById('info-add-room').value,
+            addCircuit: document.getElementById('info-add-circuit').value,
+            mgmtRate: document.getElementById('mgmt-rate').value,
+            taxRate: document.getElementById('tax-rate').value
+        };
+
+        const jsonStr = JSON.stringify(data, null, 2);
+        const blob = new Blob([jsonStr], {type: "application/json"});
+        const url = URL.createObjectURL(blob);
+        
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = "裝修報價_" + new Date().toISOString().slice(0,10) + ".json";
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+    }
+
+    // --- 匯入功能 ---
+    function triggerImport() {
+        document.getElementById('file-input').click();
+    }
+
+    function importData(input) {
+        const file = input.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                const data = JSON.parse(e.target.result);
+                
+                if(data.address) { document.getElementById('info-address').value = data.address; document.getElementById('info-address').style.color = '#333'; }
+                if(data.type) document.getElementById('info-type').value = data.type;
+                if(data.floor) document.getElementById('info-floor').value = data.floor;
+                if(data.ping) document.getElementById('info-ping').value = data.ping;
+                if(data.room) document.getElementById('info-room').value = data.room;
+                if(data.hall) document.getElementById('info-hall').value = data.hall;
+                if(data.bath) document.getElementById('info-bath').value = data.bath;
+                if(data.balcony) document.getElementById('info-balcony').value = data.balcony;
+                if(data.addRoom) document.getElementById('info-add-room').value = data.addRoom;
+                if(data.addCircuit) document.getElementById('info-add-circuit').value = data.addCircuit;
+                if(data.mgmtRate) document.getElementById('mgmt-rate').value = data.mgmtRate;
+                if(data.taxRate) document.getElementById('tax-rate').value = data.taxRate;
+
+                // 重新計算並連動
+                syncLogic();
+                alert("參數匯入成功！");
+            } catch (err) {
+                alert("匯入失敗，檔案格式可能錯誤。");
+            }
+        };
+        reader.readAsText(file);
+        // 重置 input 讓同檔名可以再次選取
+        input.value = ''; 
+    }
+
+    window.onload = function() {
+        syncLogic();
+    };
+</script>
+
+</body>
+</html>
