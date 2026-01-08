@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>室內裝修管理乙級 - 完整題庫 (含圖例描述)</title>
+    <style>
+        :root {
+            --bg-color: #f0f2f5;
+            --header-bg: #2c3e50;
+            --header-text: #fff;
+            --row-hover: #e3f2fd;
+            --accent: #2980b9;
+            --mask-color: #bdc3c7;
+        }
+
+        body {
+            font-family: "Microsoft JhengHei", "Segoe UI", sans-serif;
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 10px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            height: 95vh; /* 固定高度讓列表卷動 */
+        }
+
+        header {
+            background-color: var(--header-bg);
+            color: var(--header-text);
+            padding: 15px 20px;
+            text-align: center;
+            flex-shrink: 0;
+        }
+
+        h1 { margin: 0; font-size: 1.5rem; }
+        .subtitle { font-size: 0.9rem; opacity: 0.8; margin-top: 5px; }
+
+        /* 控制面板 */
+        .controls {
+            padding: 15px;
+            border-bottom: 1px solid #ddd;
+            background: #fff;
+            flex-shrink: 0;
+        }
+
+        .search-box {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            justify-content: center;
+        }
+
+        .btn {
+            padding: 6px 12px;
+            border: 1px solid #ccc;
+            border-radius: 15px;
+            background: #fff;
+            cursor: pointer;
+            font-size: 14px;
+            transition: 0.2s;
+            white-space: nowrap;
+        }
+
+        .btn:hover { background-color: #f1f1f1; }
+        .btn.active {
+            background-color: var(--accent);
+            color: white;
+            border-color: var(--accent);
+        }
+
+        .btn-toggle {
+            background-color: #e67e22;
+            color: white;
+            border: none;
+            font-weight: bold;
+        }
+
+        /* 列表區域 */
+        .table-wrapper {
+            flex-grow: 1;
+            overflow-y: auto; /* 只有列表會捲動 */
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background-color: #ecf0f1;
+            padding: 12px;
+            text-align: left;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            font-weight: bold;
+            color: #555;
+            border-bottom: 2px solid #ddd;
+        }
+
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #eee;
+            vertical-align: middle;
+        }
+
+        tr:nth-child(even) { background-color: #fafafa; }
+        tr:hover { background-color: var(--row-hover); }
+
+        /* 欄位樣式 */
+        .col-cat { width: 80px; font-size: 0.85rem; color: #7f8c8d; font-weight: bold; }
+        .col-sym { width: 35%; font-weight: bold; color: var(--accent); font-size: 1.1rem; }
+        .col-ans { cursor: pointer; position: relative; }
+
+        .desc-tag {
+            font-size: 0.8rem;
+            color: #666;
+            background: #eee;
+            padding: 2px 6px;
+            border-radius: 4px;
+            margin-left: 5px;
+            font-weight: normal;
+        }
+
+        /* 遮罩效果 */
+        .mask {
+            background-color: var(--mask-color);
+            color: transparent;
+            border-radius: 4px;
+            padding: 4px 8px;
+            user-select: none;
+            display: inline-block;
+            min-width: 100px;
+        }
+
+        .revealed .mask {
+            background-color: transparent;
+            color: #333;
+        }
+
+        /* 手機響應 */
+        @media (max-width: 600px) {
+            .btn { flex: 1 1 30%; font-size: 12px; }
+            .col-cat { display: none; } /* 手機版隱藏類別欄，節省空間 */
+            .col-sym { width: 40%; font-size: 1rem; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>室內裝修管理乙級 - 完整符號庫</h1>
+        <div class="subtitle" id="stats">載入中...</div>
+    </header>
+
+    <div class="controls">
+        <input type="text" class="search-box" id="searchInput" placeholder="搜尋符號、說明或答案 (例如: CWS, 混凝土, 雙切)...">
+        
+        <div class="filter-group">
+            <button class="btn active" data-filter="all">全部</button>
+            <button class="btn" data-filter="ARCH">建築代號/圖例</button>
+            <button class="btn" data-filter="MAT">構造與材質</button>
+            <button class="btn" data-filter="E">電氣設備</button>
+            <button class="btn" data-filter="P">給排水衛生</button>
+            <button class="btn" data-filter="M">空調機械</button>
+            <button class="btn" data-filter="T">電信弱電</button>
+            <button class="btn" data-filter="FIRE">消防與門窗</button>
+            <button class="btn" data-filter="CNS">CNS圖號</button>
+            <button class="btn btn-toggle" onclick="toggleAll()">👁️ 顯示/隱藏全部</button>
+        </div>
+    </div>
+
+    <div class="table-wrapper">
+        <table id="dataTable">
+            <thead>
+                <tr>
+                    <th class="col-cat">類別</th>
+                    <th class="col-sym">符號 / 代號</th>
+                    <th class="col-ans">正解 (點擊顯示)</th>
+                </tr>
+            </thead>
+            <tbody id="tableBody">
+                </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    // 完整資料庫 (根據您上傳的 9 張圖片人工轉錄)
+    const db = [
+        // === Image 01: CNS 圖號 ===
+        {c: "CNS", q: "A", d: "圖號", a: "建築圖"},
+        {c: "CNS", q: "S", d: "圖號", a: "結構圖"},
+        {c: "CNS", q: "F", d: "圖號", a: "消防設備圖"},
+        {c: "CNS", q: "E", d: "圖號", a: "電氣設備圖"},
+        {c: "CNS", q: "P", d: "圖號", a: "給水、排水及衛生設備圖"},
+        {c: "CNS", q: "M", d: "圖號", a: "空調及機械設備圖"},
+        {c: "CNS", q: "L", d: "圖號", a: "環境景觀植栽圖"},
+        {c: "CNS", q: "W", d: "圖號", a: "汙水處理設施圖"},
+        {c: "CNS", q: "G", d: "圖號", a: "瓦斯設備圖"},
+        {c: "CNS", q: "I", d: "圖號", a: "室內裝修圖"},
+
+        // === Image 02: 建築圖例常用文字 (表37) ===
+        // 用途
+        {c: "ARCH", q: "D", d: "用途代號", a: "門 (Door)"},
+        {c: "ARCH", q: "W", d: "用途代號", a: "窗 (Window)"},
+        {c: "ARCH", q: "S", d: "用途代號", a: "結構體"},
+        {c: "ARCH", q: "E", d: "用途代號", a: "電梯"},
+        {c: "ARCH", q: "A", d: "用途代號", a: "鋁製"},
+        {c: "ARCH", q: "S", d: "用途代號", a: "鋼製"},
+        {c: "ARCH", q: "W", d: "用途代號", a: "木製"},
+        // 位置
+        {c: "ARCH", q: "F", d: "位置代號", a: "地坪"},
+        {c: "ARCH", q: "C", d: "位置代號", a: "天花板"},
+        {c: "ARCH", q: "W", d: "位置代號", a: "牆"},
+        {c: "ARCH", q: "E", d: "位置代號", a: "屋簷"},
+        {c: "ARCH", q: "R", d: "位置代號", a: "屋頂"},
+        {c: "ARCH", q: "B", d: "位置代號", a: "陽台"},
+        // 尺度及其他
+        {c: "ARCH", q: "L", d: "尺度代號", a: "長"},
+        {c: "ARCH", q: "W", d: "尺度代號", a: "寬"},
+        {c: "ARCH", q: "H", d: "尺度代號", a: "高"},
+        {c: "ARCH", q: "D", d: "尺度代號", a: "深"},
+        {c: "ARCH", q: "H", d: "尺度代號", a: "扶手"},
+        {c: "ARCH", q: "T", d: "尺度代號", a: "踏步"},
+        {c: "ARCH", q: "R", d: "尺度代號", a: "級高"},
+        {c: "ARCH", q: "DN", d: "方向代號", a: "下"},
+        {c: "ARCH", q: "UP", d: "方向代號", a: "上"},
+        {c: "ARCH", q: "RF", d: "樓層代號", a: "屋頂層"},
+        {c: "ARCH", q: "PH", d: "樓層代號", a: "屋頂突出物"},
+        {c: "ARCH", q: "GL", d: "線條代號", a: "地界線"},
+        {c: "ARCH", q: "FL", d: "線條代號", a: "地板線"},
+        {c: "ARCH", q: "CL", d: "線條代號", a: "中心線"},
+        {c: "ARCH", q: "WL", d: "線條代號", a: "水位線"},
+        {c: "ARCH", q: "HL", d: "線條代號", a: "水平線"},
+        {c: "ARCH", q: "BM", d: "測量代號", a: "水準點"},
+        {c: "ARCH", q: "EL", d: "測量代號", a: "高程"}, // 圖片中似乎是 EL 或 FL，依常理判斷
+        {c: "ARCH", q: "@", d: "符號", a: "間距"},
+        {c: "ARCH", q: "t", d: "符號", a: "厚度"},
+        {c: "ARCH", q: "Ø", d: "符號", a: "直徑"},
+        // 門窗縮寫
+        {c: "ARCH", q: "DW", d: "縮寫", a: "門窗"},
+        {c: "ARCH", q: "SD", d: "縮寫", a: "拉門"},
+        {c: "ARCH", q: "AD", d: "縮寫", a: "鋁門"},
+        {c: "ARCH", q: "WD", d: "縮寫", a: "木門"},
+        {c: "ARCH", q: "SS", d: "縮寫", a: "不鏽鋼"},
+        {c: "ARCH", q: "RD", d: "縮寫", a: "迴轉門"},
+        {c: "ARCH", q: "FD", d: "縮寫", a: "防火門"},
+        {c: "ARCH", q: "GW", d: "縮寫", a: "玻璃窗"},
+        // 材料代號
+        {c: "MAT", q: "C", d: "材料代號", a: "混凝土"},
+        {c: "MAT", q: "B", d: "材料代號", a: "磚"},
+        {c: "MAT", q: "W", d: "材料代號", a: "木"},
+        {c: "MAT", q: "S", d: "材料代號", a: "鋼"},
+        {c: "MAT", q: "R", d: "材料代號", a: "鋼筋"},
+        {c: "MAT", q: "A", d: "材料代號", a: "鋁"},
+        {c: "MAT", q: "G", d: "材料代號", a: "玻璃"},
+        {c: "MAT", q: "P", d: "材料代號", a: "塑膠"},
+        {c: "MAT", q: "RC", d: "材料代號", a: "鋼筋混凝土"},
+        {c: "MAT", q: "SRC", d: "材料代號", a: "鋼骨鋼筋混凝土"},
+        {c: "MAT", q: "PC", d: "材料代號", a: "預力混凝土"},
+        {c: "MAT", q: "FB", d: "材料代號", a: "化妝磚"},
+        {c: "MAT", q: "RB", d: "材料代號", a: "加強磚造"},
+
+        // === Image 03: 門窗、樓梯、構造圖例 (表38, 39) ===
+        // 門窗圖例 (需視覺描述)
+        {c: "ARCH", q: "[圖] 左右箭頭", d: "門窗操作", a: "出入口"},
+        {c: "ARCH", q: "[圖] 1/4圓弧", d: "門圖例", a: "單開門"},
+        {c: "ARCH", q: "[圖] 兩個1/4圓弧", d: "門圖例", a: "雙開門 (雙向門)"},
+        {c: "ARCH", q: "[圖] 1/4圓弧 (虛線)", d: "門圖例", a: "單向門"},
+        {c: "ARCH", q: "[圖] 門片推開狀", d: "門圖例", a: "推開門"},
+        {c: "ARCH", q: "[圖] 門片重疊", d: "門圖例", a: "單拉門"},
+        {c: "ARCH", q: "[圖] 兩個門片重疊", d: "門圖例", a: "雙拉門"},
+        {c: "ARCH", q: "[圖] 門片折疊狀", d: "門圖例", a: "折疊門"},
+        {c: "ARCH", q: "[圖] 兩扇折疊", d: "門圖例", a: "雙折疊門"},
+        {c: "ARCH", q: "[圖] 兩側收納", d: "門圖例", a: "收拉門"},
+        {c: "ARCH", q: "[圖] 十字型旋轉", d: "門圖例", a: "旋轉門"},
+        {c: "ARCH", q: "[圖] 鐵捲門形狀", d: "門圖例", a: "捲門"},
+        {c: "ARCH", q: "[圖] 階梯狀 + UP", d: "樓梯", a: "上樓梯"},
+        {c: "ARCH", q: "[圖] 階梯狀 + DN", d: "樓梯", a: "下樓梯"},
+        {c: "ARCH", q: "[圖] 斜坡箭頭", d: "坡道", a: "斜坡道"},
+        {c: "ARCH", q: "[圖] 方格中打X", d: "升降機", a: "昇降機 (電梯)"},
+        {c: "ARCH", q: "[圖] 階梯側視", d: "樓梯", a: "上下拉梯"},
+        {c: "ARCH", q: "[圖] 只有框架", d: "門洞", a: "無門扇之門口"},
+        // 構造與材料圖例 (表39)
+        {c: "MAT", q: "[圖] 45度斜雙線", d: "材料剖面", a: "磚牆"},
+        {c: "MAT", q: "[圖] 空心方塊", d: "材料剖面", a: "砌塊"},
+        {c: "MAT", q: "[圖] 三角形碎石", d: "材料剖面", a: "混凝土"},
+        {c: "MAT", q: "[圖] 鋼筋網狀", d: "材料剖面", a: "鋼筋混凝土"},
+        {c: "MAT", q: "[圖] 石頭堆砌", d: "材料剖面", a: "石材"},
+        {c: "MAT", q: "[圖] 亂石堆砌", d: "材料剖面", a: "卵石"},
+        {c: "MAT", q: "[圖] 密集細點", d: "材料剖面", a: "夯實土 / 地盤"},
+        {c: "MAT", q: "[圖] 空心磚形", d: "材料剖面", a: "空心磚牆"},
+        {c: "MAT", q: "[圖] 年輪紋路", d: "材料剖面", a: "木材 (橫斷面)"},
+        {c: "MAT", q: "[圖] 不規則紋路", d: "材料剖面", a: "木材 (縱斷面)"},
+        {c: "MAT", q: "[圖] 直線條紋", d: "材料剖面", a: "合板"},
+        {c: "MAT", q: "[圖] 雙線夾層", d: "材料剖面", a: "玻璃"},
+        {c: "MAT", q: "[圖] 鬆散點狀", d: "材料剖面", a: "土壤 / 砂"},
+        {c: "MAT", q: "[圖] 網格狀", d: "材料剖面", a: "磁磚 / 馬賽克"},
+        {c: "MAT", q: "[圖] 波浪狀", d: "材料剖面", a: "保溫吸音材料"},
+
+        // === Image 04: 建築配置 & 防火門窗 (表26, 27) ===
+        {c: "ARCH", q: "[圖] 點劃線 (— . —)", d: "線型", a: "地界線 (深綠色)"},
+        {c: "ARCH", q: "[圖] 虛線 (---)", d: "線型", a: "建築線 (紅色)"},
+        {c: "ARCH", q: "[圖] 雙點劃線 (— .. —)", d: "線型", a: "計畫道路 (兩旁橙色線)"},
+        {c: "ARCH", q: "[圖] 實線方框", d: "圖例", a: "現有巷道 (褐色)"},
+        {c: "ARCH", q: "[圖] 雙實線", d: "圖例", a: "騎樓 (黃色斜紅)"},
+        {c: "ARCH", q: "[圖] 粗實線", d: "圖例", a: "新建 / 改建 / 增建房屋 (紅色)"},
+        {c: "ARCH", q: "[圖] 粗虛線", d: "圖例", a: "防空地下室 (紅色對角虛線)"},
+        {c: "ARCH", q: "[圖] 斜線填充", d: "圖例", a: "鄰近房屋 (不著色)"},
+        {c: "ARCH", q: "[圖] 稀疏斜線", d: "圖例", a: "基地內現有房屋 (藍色)"},
+        {c: "ARCH", q: "[圖] 空地", d: "圖例", a: "空地 (綠色)"},
+        {c: "ARCH", q: "[圖] 波浪線", d: "圖例", a: "河 / 川 / 溝渠 (藍色)"},
+        {c: "ARCH", q: "[圖] 粗實線框", d: "圖例", a: "防火間隔 (草綠色)"},
+        {c: "ARCH", q: "[圖] 交叉線", d: "圖例", a: "退縮地 (橙色)"},
+        {c: "ARCH", q: "[圖] 木紋", d: "圖例", a: "木樁"},
+        // 防火門窗 (Image 04 下半部)
+        {c: "FIRE", q: "Dn", d: "代號", a: "普通門"},
+        {c: "FIRE", q: "f(60A)", d: "代號", a: "具1小時防火時效及阻熱性防火門"},
+        {c: "FIRE", q: "f(60B)", d: "代號", a: "具1小時防火時效防火門 (半小時阻熱)"},
+        {c: "FIRE", q: "Dn 爆", d: "代號", a: "防爆門"},
+        {c: "FIRE", q: "Wn", d: "代號", a: "普通窗"},
+        {c: "FIRE", q: "Wn(60/30A)", d: "代號", a: "具1小時防火時效及半小時阻熱性防火窗"},
+        {c: "FIRE", q: "Dn (遮)", d: "代號", a: "防煙垂壁"}, // 推測
+
+        // === Image 05: 鋼筋 & 消防設備 (表40, 41) ===
+        {c: "ARCH", q: "C", d: "構件代號", a: "柱"},
+        {c: "ARCH", q: "F", d: "構件代號", a: "基腳"},
+        {c: "ARCH", q: "FG", d: "構件代號", a: "地梁"},
+        {c: "ARCH", q: "G", d: "構件代號", a: "梁"},
+        {c: "ARCH", q: "b", d: "構件代號", a: "小梁"},
+        {c: "ARCH", q: "S", d: "構件代號", a: "樓板"},
+        {c: "ARCH", q: "T", d: "構件代號", a: "樓梯"},
+        {c: "ARCH", q: "W", d: "構件代號", a: "牆"},
+        {c: "ARCH", q: "FS", d: "構件代號", a: "筏式基礎板"},
+        {c: "ARCH", q: "RW", d: "構件代號", a: "擋土牆"},
+        // 消防設備
+        {c: "FIRE", q: "F", d: "管線代號", a: "消防水管"},
+        {c: "FIRE", q: "— S —", d: "管線代號", a: "撒水管"},
+        {c: "FIRE", q: "— A —", d: "管線代號", a: "泡沫管"},
+        {c: "FIRE", q: "— CO2 —", d: "管線代號", a: "二氧化碳管"},
+        {c: "FIRE", q: "○ (雙圈)", d: "設備", a: "自動灑水頭"},
+        {c: "FIRE", q: "○ S", d: "設備", a: "側壁型灑水頭"},
+        {c: "FIRE", q: "Ⓢ", d: "設備", a: "排煙口"},
+        {c: "FIRE", q: "[圖] 方框內S", d: "設備", a: "手動啟動裝置"},
+        {c: "FIRE", q: "[圖] 喇叭狀", d: "設備", a: "泡沫噴頭"},
+        {c: "FIRE", q: "P", d: "設備", a: "火警發信機"},
+        {c: "FIRE", q: "A", d: "設備", a: "火警警鈴"},
+        {c: "FIRE", q: "L", d: "設備", a: "火警標示燈"},
+        {c: "FIRE", q: "D", d: "設備", a: "火警探測器(偵煙)"},
+        {c: "FIRE", q: "[圖] 箭頭箱", d: "設備", a: "出口標示燈"},
+        {c: "FIRE", q: "[圖] 人跑向門", d: "設備", a: "避難方向指示燈"},
+        {c: "FIRE", q: "[圖] 消防栓箱", d: "設備", a: "室內消防栓箱"},
+        {c: "FIRE", q: "Si", d: "設備", a: "連接送水口"},
+
+        // === Image 06: 電氣設備 (表42, 43) - 補強 ===
+        {c: "E", q: "●", d: "實心黑點", a: "單極開關"},
+        {c: "E", q: "●₂", d: "黑點旁標2", a: "雙極開關"},
+        {c: "E", q: "●₃", d: "黑點旁標3", a: "三路開關 (雙切)"},
+        {c: "E", q: "●₄", d: "黑點旁標4", a: "四路開關"},
+        {c: "E", q: "● K", d: "黑點旁標K", a: "鑰匙操作開關"},
+        {c: "E", q: "● P", d: "黑點旁標P", a: "拉線開關"},
+        {c: "E", q: "● WP", d: "黑點旁標WP", a: "防水開關"},
+        {c: "E", q: "● T", d: "黑點旁標T", a: "時控開關"},
+        {c: "E", q: "⊝", d: "圓圈兩豎線", a: "單連插座"},
+        {c: "E", q: "⊝⊝", d: "兩個圓圈", a: "雙連插座"},
+        {c: "E", q: "⊝ G", d: "插座旁標G", a: "接地型插座"},
+        {c: "E", q: "⊝ WP", d: "插座旁標WP", a: "防水插座"},
+        {c: "E", q: "⊞", d: "方框十字", a: "單連地板插座"},
+        {c: "E", q: "⊟", d: "方框雙豎", a: "雙連地板插座"},
+        {c: "E", q: "Ⓣ", d: "雙圈T", a: "電話出線口"},
+        {c: "E", q: "○", d: "空心圓", a: "白熾燈"},
+        {c: "E", q: "○ R", d: "圓圈內R", a: "嵌頂燈"},
+        {c: "E", q: "⊢○", d: "燈具符號", a: "壁燈"},
+        {c: "E", q: "[圖] T-BAR", d: "燈具符號", a: "T-BAR日光燈"},
+        {c: "E", q: "⚡", d: "符號", a: "接戶點"},
+        {c: "E", q: "⏚", d: "符號", a: "接地"},
+        {c: "E", q: "▨", d: "配電盤", a: "分電盤"},
+        {c: "E", q: "M (方框)", d: "符號", a: "總開關 (MCCB)"},
+
+        // === Image 07: 給排水 (表44, 45) - 補強 ===
+        {c: "P", q: "— D —", d: "管線代號", a: "排水管"},
+        {c: "P", q: "— S —", d: "管線代號", a: "汙水管 (或蒸氣)"},
+        {c: "P", q: "— V —", d: "管線代號", a: "通氣管"},
+        {c: "P", q: "— G —", d: "管線代號", a: "瓦斯管"},
+        {c: "P", q: "— RD —", d: "管線代號", a: "雨水排水管"},
+        {c: "P", q: "— HW —", d: "管線代號", a: "熱水管"},
+        {c: "P", q: "— CW —", d: "管線代號", a: "冷水管"},
+        {c: "P", q: "— F —", d: "管線代號", a: "消防管"},
+        {c: "P", q: "N (圖形)", d: "閥類", a: "逆止閥"},
+        {c: "P", q: "⋈", d: "閥類", a: "閘閥"},
+        {c: "P", q: "● (線中)", d: "閥類", a: "球型閥"},
+        {c: "P", q: "Ⓟ", d: "儀表", a: "壓力錶"},
+        {c: "P", q: "Ⓣ", d: "儀表", a: "溫度計"},
+        {c: "P", q: "FD", d: "設備", a: "地板落水頭"},
+        {c: "P", q: "CO", d: "設備", a: "清潔口 (地板面)"},
+        {c: "P", q: "FCO", d: "設備", a: "清潔口 (地板下)"},
+        {c: "P", q: "🚽", d: "圖形", a: "坐式馬桶"},
+        {c: "P", q: "🛀", d: "圖形", a: "浴缸"},
+        {c: "P", q: "💧", d: "圖形", a: "洗臉盆"},
+
+        // === Image 08: 電信 (表46, 47) - 補強 ===
+        {c: "T", q: "▭ (上黑下白)", d: "箱體", a: "總配線箱"},
+        {c: "T", q: "▭ (全白)", d: "箱體", a: "拖線箱"},
+        {c: "T", q: "▭ (上黑中白下黑)", d: "箱體", a: "主配線箱"},
+        {c: "T", q: "▭ (中橫線)", d: "箱體", a: "支配線箱"},
+        {c: "T", q: "Ⓣ (圓圈T)", d: "出線匣", a: "地板型暗式出線匣"},
+        {c: "T", q: "Ⓣ (壁型)", d: "出線匣", a: "壁型暗式出線匣"},
+        {c: "T", q: "PT", d: "出線匣", a: "公用電話出線匣"},
+        {c: "T", q: "HH", d: "手孔", a: "手孔"},
+        {c: "T", q: "E", d: "接地", a: "總接地箱"},
+        {c: "T", q: "— T —", d: "管線", a: "電信管線 (暗式)"},
+        {c: "T", q: "— . — T", d: "管線", a: "電信管線 (明式)"},
+        {c: "T", q: "MDF", d: "設備", a: "總配線架"},
+        {c: "T", q: "PB", d: "按鈕", a: "按鈕開關"},
+        {c: "T", q: "TV", d: "圓圈TV", a: "電視出線口"},
+        {c: "T", q: "— TV —", d: "管線", a: "電視管線"},
+        {c: "T", q: "IC", d: "圓圈IC", a: "對講機出線口"},
+
+        // === Image 09: 空調 (表48) - 補強 ===
+        {c: "M", q: "— CWS —", d: "管線代號", a: "冷卻送水管"},
+        {c: "M", q: "— CWR —", d: "管線代號", a: "冷卻回水管"},
+        {c: "M", q: "— CHS —", d: "管線代號", a: "冰水送水管"},
+        {c: "M", q: "— CHR —", d: "管線代號", a: "冰水回水管"},
+        {c: "M", q: "— RD —", d: "管線代號", a: "冷媒送出管"},
+        {c: "M", q: "— RS —", d: "管線代號", a: "冷媒吸入管"},
+        {c: "M", q: "— RL —", d: "管線代號", a: "冷媒液管"},
+        {c: "M", q: "— D —", d: "管線代號", a: "排水管"},
+        {c: "M", q: "[圖] 方框X", d: "風管剖面", a: "供應風管 (正壓)"},
+        {c: "M", q: "[圖] 方框斜線", d: "風管剖面", a: "回風風管 (負壓)"},
+        {c: "M", q: "[M]", d: "閘門", a: "電動閘門"},
+        {c: "M", q: "[F]", d: "閘門", a: "防火閘門"},
+        {c: "M", q: "[VD]", d: "閘門", a: "風量調節閘門"},
+        {c: "M", q: "[圖] 箭頭四散", d: "出風口", a: "平頂出風口 (擴散型)"},
+        {c: "M", q: "⧈ (百葉)", d: "回風口", a: "回風口 / 排風口"},
+        {c: "M", q: "—||—", d: "接頭", a: "伸縮接頭"},
+        {c: "M", q: "—⌇—", d: "接頭", a: "軟管"}
+    ];
+
+    const tbody = document.getElementById('tableBody');
+    const statsDiv = document.getElementById('stats');
+    const searchInput = document.getElementById('searchInput');
+    const buttons = document.querySelectorAll('.filter-group .btn:not(.btn-toggle)');
+
+    let currentFilter = 'all';
+    let isAllRevealed = false;
+
+    function renderTable() {
+        const searchTerm = searchInput.value.toLowerCase().trim();
+        
+        const filtered = db.filter(item => {
+            const matchFilter = currentFilter === 'all' || item.c === currentFilter;
+            const matchSearch = item.q.toLowerCase().includes(searchTerm) || 
+                                item.a.toLowerCase().includes(searchTerm) ||
+                                item.d.toLowerCase().includes(searchTerm);
+            return matchFilter && matchSearch;
+        });
+
+        let html = '';
+        if (filtered.length === 0) {
+            html = '<tr><td colspan="3" style="text-align:center; padding:30px;">沒有找到相符的資料</td></tr>';
+        } else {
+            filtered.forEach(item => {
+                const revealClass = isAllRevealed ? 'revealed' : '';
+                html += `
+                    <tr onclick="toggleRow(this)">
+                        <td class="col-cat">${getCatName(item.c)}</td>
+                        <td class="col-sym">
+                            ${item.q}
+                            <span class="desc-tag">${item.d}</span>
+                        </td>
+                        <td class="col-ans ${revealClass}">
+                            <span class="mask">${item.a}</span>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        tbody.innerHTML = html;
+        statsDiv.textContent = `共 ${db.length} 題 / 顯示 ${filtered.length} 題`;
+    }
+
+    function getCatName(code) {
+        const map = {
+            'ARCH': '建築代號',
+            'MAT': '構造材質',
+            'E': '電氣',
+            'P': '給排水',
+            'M': '空調',
+            'T': '電信',
+            'FIRE': '消防門窗',
+            'CNS': 'CNS圖號'
+        };
+        return map[code] || code;
+    }
+
+    window.toggleRow = function(row) {
+        const cell = row.querySelector('.col-ans');
+        cell.classList.toggle('revealed');
+    }
+
+    window.toggleAll = function() {
+        isAllRevealed = !isAllRevealed;
+        const cells = document.querySelectorAll('.col-ans');
+        cells.forEach(c => isAllRevealed ? c.classList.add('revealed') : c.classList.remove('revealed'));
+    }
+
+    buttons.forEach(btn => {
+        btn.addEventListener('click', () => {
+            buttons.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            currentFilter = btn.dataset.filter;
+            renderTable();
+        });
+    });
+
+    searchInput.addEventListener('input', renderTable);
+
+    // Initial Render
+    renderTable();
+
+</script>
+
+</body>
+</html>
