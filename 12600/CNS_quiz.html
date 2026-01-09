@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CNS圖號練習題庫</title>
+    <style>
+        :root {
+            --accent: #2980b9;
+            --mask-color: #bdc3c7;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: "Microsoft JhengHei", sans-serif;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            background: linear-gradient(135deg, #2c3e50, #3498db);
+            color: white;
+            padding: 12px;
+            text-align: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        h1 {
+            font-size: 1.2rem;
+        }
+
+        .subtitle {
+            font-size: 0.75rem;
+            opacity: 0.8;
+            margin-top: 4px;
+        }
+
+        .controls {
+            padding: 8px;
+            border-bottom: 1px solid #ddd;
+            background: #fafafa;
+            position: sticky;
+            top: 52px;
+            z-index: 99;
+        }
+
+        .search-box {
+            width: 100%;
+            padding: 8px 12px;
+            margin-bottom: 8px;
+            border: 1px solid #ddd;
+            border-radius: 20px;
+            font-size: 14px;
+        }
+
+        .filter-scroll {
+            overflow-x: auto;
+            white-space: nowrap;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+            padding-bottom: 4px;
+        }
+
+        .filter-scroll::-webkit-scrollbar {
+            display: none;
+        }
+
+        .filter-group {
+            display: inline-flex;
+            gap: 6px;
+        }
+
+        .btn {
+            padding: 6px 12px;
+            border: 1px solid #ddd;
+            border-radius: 15px;
+            background: white;
+            cursor: pointer;
+            font-size: 12px;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .btn.active {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border-color: transparent;
+        }
+
+        .btn-toggle {
+            background: #e67e22;
+            color: white;
+            border: none;
+        }
+
+        .quiz-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            padding: 8px;
+            flex: 1;
+        }
+
+        .quiz-card {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            cursor: pointer;
+        }
+
+        .card-header {
+            background: #ecf0f1;
+            padding: 4px 6px;
+            font-size: 0.65rem;
+            color: #666;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .card-body {
+            padding: 8px;
+            text-align: center;
+            min-height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #fff;
+        }
+
+        .card-body img {
+            max-width: 100%;
+            max-height: 40px;
+            object-fit: contain;
+        }
+
+        .card-body .text-symbol {
+            font-size: 1rem;
+            font-weight: bold;
+            color: var(--accent);
+        }
+
+        .card-answer {
+            padding: 8px 4px;
+            background: var(--mask-color);
+            color: transparent;
+            text-align: center;
+            font-size: 0.75rem;
+            font-weight: bold;
+            min-height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .quiz-card.revealed .card-answer {
+            background: linear-gradient(135deg, #2ecc71, #27ae60);
+            color: white;
+        }
+
+        @media (min-width: 600px) {
+            .quiz-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+
+        @media (max-width: 400px) {
+            .quiz-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1>🏗️ CNS圖號練習題庫</h1>
+            <div class="subtitle" id="stats">載入中...</div>
+        </header>
+        <div class="controls">
+            <input type="text" class="search-box" id="searchInput" placeholder="🔍 搜尋...">
+            <div class="filter-scroll">
+                <div class="filter-group">
+                    <button class="btn active" data-filter="all">全部</button>
+                    <button class="btn" data-filter="CNS">CNS圖號</button>
+                    <button class="btn" data-filter="ARCH">建築符號</button>
+                    <button class="btn" data-filter="STRUCT">結構符號</button>
+                    <button class="btn" data-filter="E">電氣設備</button>
+                    <button class="btn" data-filter="P">給排水</button>
+                    <button class="btn" data-filter="M">空調機械</button>
+                    <button class="btn" data-filter="T">電信弱電</button>
+                    <button class="btn" data-filter="FIRE">消防設備</button>
+                    <button class="btn" data-filter="MAT">構造材質</button>
+                    <button class="btn btn-toggle" onclick="toggleAll()">👁️</button>
+                </div>
+            </div>
+        </div>
+        <div class="quiz-grid" id="quizGrid"></div>
+    </div>
+
+    <script>
+        const db = [
+            // === CNS 圖號代號 (CNS_13) ===
+            { c: "CNS", q: "ID", d: "圖號", a: "室內設計裝修圖" },
+            { c: "CNS", q: "A", d: "圖號", a: "建築圖" },
+            { c: "CNS", q: "S", d: "圖號", a: "結構圖" },
+            { c: "CNS", q: "F", d: "圖號", a: "消防設備圖" },
+            { c: "CNS", q: "E", d: "圖號", a: "電氣設備圖" },
+            { c: "CNS", q: "P", d: "圖號", a: "給排水衛生設備圖" },
+            { c: "CNS", q: "M", d: "圖號", a: "空調及機械設備圖" },
+            { c: "CNS", q: "L", d: "圖號", a: "環境景觀植栽圖" },
+            { c: "CNS", q: "W", d: "圖號", a: "汙水處理設施圖" },
+            { c: "CNS", q: "G", d: "圖號", a: "瓦斯設備圖" },
+
+            // === 常用符號 (CNS_15) ===
+            // 尺度及位置
+            { c: "ARCH", q: "D·d", d: "符號", a: "直徑" },
+            { c: "ARCH", q: "R·r", d: "符號", a: "半徑" },
+            { c: "ARCH", q: "W", d: "尺度", a: "寬度" },
+            { c: "ARCH", q: "L", d: "尺度", a: "長度" },
+            { c: "ARCH", q: "D", d: "尺度", a: "深度" },
+            { c: "ARCH", q: "H", d: "尺度", a: "高度" },
+            { c: "ARCH", q: "t", d: "尺度", a: "厚度" },
+            { c: "ARCH", q: "@", d: "符號", a: "間隔" },
+            { c: "ARCH", q: "C.C.", d: "符號", a: "中心間隔" },
+            { c: "ARCH", q: "℄", d: "符號", a: "中心線" },
+            { c: "ARCH", q: "BM", d: "符號", a: "水準點" },
+            { c: "ARCH", q: "HL", d: "線條", a: "水平線" },
+            { c: "ARCH", q: "VL", d: "線條", a: "垂直線" },
+            { c: "ARCH", q: "GL", d: "線條", a: "地盤線" },
+            { c: "ARCH", q: "WL", d: "線條", a: "牆面線" },
+            { c: "ARCH", q: "CL", d: "線條", a: "天花板線" },
+            { c: "ARCH", q: "1F", d: "樓層", a: "一樓地板面" },
+            { c: "ARCH", q: "2F", d: "樓層", a: "二樓地板面" },
+            { c: "ARCH", q: "B1", d: "樓層", a: "地下一層" },
+            { c: "ARCH", q: "B2", d: "樓層", a: "地下二層" },
+            { c: "ARCH", q: "FL", d: "線條", a: "地板面線" },
+            { c: "ARCH", q: "FFL", d: "線條", a: "地板裝飾面線" },
+            { c: "ARCH", q: "PH", d: "樓層", a: "屋頂突出物" },
+            { c: "ARCH", q: "RF", d: "樓層", a: "屋頂" },
+            // 門窗
+            { c: "ARCH", q: "D", d: "門窗", a: "門" },
+            { c: "ARCH", q: "W", d: "門窗", a: "窗" },
+            { c: "ARCH", q: "DW", d: "門窗", a: "門連窗" },
+            // 鋼料
+            { c: "ARCH", q: "W", d: "鋼料", a: "寬緣I型鋼" },
+            { c: "ARCH", q: "S", d: "鋼料", a: "標準I型鋼" },
+            { c: "ARCH", q: "H", d: "鋼料", a: "H型鋼" },
+            { c: "ARCH", q: "Z", d: "鋼料", a: "Z型鋼" },
+            { c: "ARCH", q: "T", d: "鋼料", a: "T型鋼" },
+            { c: "ARCH", q: "ㄈ", d: "鋼料", a: "槽型鋼" },
+            { c: "ARCH", q: "C", d: "鋼料", a: "輕型鋼" },
+            { c: "ARCH", q: "L", d: "鋼料", a: "角鋼" },
+            { c: "ARCH", q: "B", d: "鋼料", a: "螺栓" },
+            { c: "ARCH", q: "R", d: "鋼料", a: "鉚釘" },
+            { c: "ARCH", q: "FB", d: "材料", a: "扁鋼" },
+            { c: "ARCH", q: "PL", d: "材料", a: "鋼板" },
+            { c: "ARCH", q: "GIP", d: "材料", a: "鍍鋅鋼管" },
+            { c: "ARCH", q: "CIP", d: "材料", a: "鑄鐵管" },
+            { c: "ARCH", q: "SSP", d: "材料", a: "不銹鋼管" },
+            { c: "ARCH", q: "RCP", d: "材料", a: "鋼筋混凝土管" },
+            { c: "ARCH", q: "PVCP", d: "材料", a: "聚氯乙烯管" },
+            { c: "ARCH", q: "GIS", d: "材料", a: "鍍鋅鋼板" },
+            { c: "ARCH", q: "#", d: "符號", a: "規格號碼" },
+            { c: "ARCH", q: "Ø", d: "符號", a: "直徑" },
+            // 垂直交通
+            { c: "ARCH", q: "UP", d: "方向", a: "上(樓梯、坡道)" },
+            { c: "ARCH", q: "DN", d: "方向", a: "下(樓梯、坡道)" },
+            { c: "ARCH", q: "R", d: "樓梯", a: "樓梯級高" },
+            { c: "ARCH", q: "T", d: "樓梯", a: "樓梯級深" },
+            { c: "ARCH", q: "ELEV", d: "設備", a: "昇降機" },
+            { c: "ARCH", q: "ESCA", d: "設備", a: "自動樓梯(電扶梯)" },
+
+            // === 結構圖符號 (CNS_21) ===
+            // 構材
+            { c: "STRUCT", q: "C", d: "構材", a: "柱" },
+            { c: "STRUCT", q: "F", d: "構材", a: "基腳" },
+            { c: "STRUCT", q: "FG·FB", d: "構材", a: "地梁" },
+            { c: "STRUCT", q: "G·B", d: "構材", a: "構架梁" },
+            { c: "STRUCT", q: "b", d: "構材", a: "非構架梁" },
+            { c: "STRUCT", q: "TG·TB", d: "構材", a: "構架繫梁" },
+            { c: "STRUCT", q: "Tb", d: "構材", a: "非構架繫梁" },
+            { c: "STRUCT", q: "CG·CB", d: "構材", a: "構架懸臂梁" },
+            { c: "STRUCT", q: "Cb", d: "構材", a: "非構架懸臂梁" },
+            { c: "STRUCT", q: "S", d: "構材", a: "板" },
+            { c: "STRUCT", q: "CS", d: "構材", a: "懸臂板" },
+            { c: "STRUCT", q: "W", d: "構材", a: "牆" },
+            { c: "STRUCT", q: "WB", d: "構材", a: "牆梁" },
+            { c: "STRUCT", q: "SS", d: "構材", a: "樓梯梯板" },
+            { c: "STRUCT", q: "FS", d: "構材", a: "基礎板" },
+            { c: "STRUCT", q: "BW", d: "構材", a: "承重牆" },
+            { c: "STRUCT", q: "SW", d: "構材", a: "剪力牆" },
+            { c: "STRUCT", q: "T", d: "構材", a: "桁架" },
+            { c: "STRUCT", q: "P", d: "構材", a: "桁條" },
+            { c: "STRUCT", q: "J", d: "構材", a: "椽椽" },
+            { c: "STRUCT", q: "UU", d: "構材", a: "上弦構材" },
+            { c: "STRUCT", q: "LL", d: "構材", a: "下弦構材" },
+            { c: "STRUCT", q: "UL", d: "構材", a: "腹材" },
+            // 層別
+            { c: "STRUCT", q: "R", d: "層別", a: "屋頂" },
+            { c: "STRUCT", q: "P", d: "層別", a: "屋頂突出物" },
+            { c: "STRUCT", q: "B", d: "層別", a: "地下室" },
+            { c: "STRUCT", q: "M", d: "層別", a: "夾層" },
+            // 構造
+            { c: "STRUCT", q: "RC", d: "構造", a: "鋼筋混凝土造" },
+            { c: "STRUCT", q: "S", d: "構造", a: "鋼構造" },
+            { c: "STRUCT", q: "SRC", d: "構造", a: "鋼骨鋼筋混凝土造" },
+            { c: "STRUCT", q: "B", d: "構造", a: "磚構造" },
+            { c: "STRUCT", q: "RB", d: "構造", a: "加強磚造" },
+            { c: "STRUCT", q: "W", d: "構造", a: "木構造" },
+
+            // 電氣設備 (Elect) - 已驗證
+            { c: "E", img: "Elect_01.png", d: "開關", a: "單極開關" },
+            { c: "E", img: "Elect_02.png", d: "開關", a: "雙極開關" },
+            { c: "E", img: "Elect_03.png", d: "開關", a: "三路開關(雙切)" },
+            { c: "E", img: "Elect_04.png", d: "開關", a: "四路開關" },
+            { c: "E", img: "Elect_05.png", d: "開關", a: "鑰匙操作開關" },
+            { c: "E", img: "Elect_06.png", d: "開關", a: "拉線開關" },
+            { c: "E", img: "Elect_07.png", d: "開關", a: "防水開關" },
+            { c: "E", img: "Elect_08.png", d: "開關", a: "時控開關" },
+            { c: "E", img: "Elect_09.png", d: "插座", a: "單連插座" },
+            { c: "E", img: "Elect_10.png", d: "導線", a: "導線規格標示" },
+            { c: "E", img: "Elect_11.png", d: "插座", a: "雙連插座" },
+            { c: "E", img: "Elect_12.png", d: "插座", a: "接地型插座" },
+            { c: "E", img: "Elect_13.png", d: "插座", a: "防水插座" },
+            { c: "E", img: "Elect_14.png", d: "插座", a: "單連地板插座" },
+            { c: "E", img: "Elect_15.png", d: "插座", a: "雙連地板插座" },
+            { c: "E", img: "Elect_16.png", d: "出線口", a: "電話出線口" },
+            { c: "E", img: "Elect_17.png", d: "燈具", a: "白熾燈" },
+            { c: "E", img: "Elect_18.png", d: "燈具", a: "嵌頂燈" },
+            { c: "E", img: "Elect_19.png", d: "燈具", a: "壁燈" },
+            { c: "E", img: "Elect_20.png", d: "燈具", a: "日光燈" },
+            { c: "E", img: "Elect_21.png", d: "燈具", a: "緊急照明燈" },
+            { c: "E", img: "Elect_22.png", d: "符號", a: "接戶點" },
+            { c: "E", img: "Elect_23.png", d: "符號", a: "接地" },
+            { c: "E", img: "Elect_24.png", d: "符號", a: "分電盤" },
+            { c: "E", img: "Elect_25.png", d: "符號", a: "總開關(MCCB)" },
+            { c: "E", img: "Elect_26.png", d: "配線", a: "電力配線(暗管)" },
+            { c: "E", img: "Elect_27.png", d: "配線", a: "電力配線(明管)" },
+            { c: "E", img: "Elect_28.png", d: "配線", a: "接地線" },
+            { c: "E", img: "Elect_29.png", d: "燈具", a: "T-BAR日光燈" },
+            { c: "E", img: "Elect_30.png", d: "燈具", a: "吸頂日光燈" },
+            { c: "E", img: "Elect_31.png", d: "開關", a: "調光器" },
+            { c: "E", img: "Elect_32.png", d: "開關", a: "附指示燈開關" },
+            { c: "E", img: "Elect_33.png", d: "插座", a: "專用插座" },
+            { c: "E", img: "Elect_34.png", d: "插座", a: "冷氣插座" },
+            { c: "E", img: "Elect_35.png", d: "設備", a: "抽風機" },
+            { c: "E", img: "Elect_36.png", d: "設備", a: "吊扇" },
+            { c: "E", img: "Elect_37.png", d: "符號", a: "電表" },
+            { c: "E", img: "Elect_38.png", d: "符號", a: "變壓器" },
+            { c: "E", img: "Elect_39.png", d: "配電", a: "配電箱" },
+            { c: "E", img: "Elect_40.png", d: "配電", a: "開關箱" },
+            { c: "E", img: "Elect_41.png", d: "設備", a: "門鈴" },
+            { c: "E", img: "Elect_42.png", d: "設備", a: "蜂鳴器" },
+            { c: "E", img: "Elect_43.png", d: "燈具", a: "投射燈" },
+            { c: "E", img: "Elect_44.png", d: "燈具", a: "軌道燈" },
+            { c: "E", img: "Elect_45.png", d: "設備", a: "感應器" },
+
+            // 消防設備 (Fire)
+            { c: "FIRE", img: "Fire_01.png", d: "管線", a: "消防水管" },
+            { c: "FIRE", img: "Fire_02.png", d: "管線", a: "撒水管" },
+            { c: "FIRE", img: "Fire_03.png", d: "管線", a: "泡沫管" },
+            { c: "FIRE", img: "Fire_04.png", d: "管線", a: "二氧化碳管" },
+            { c: "FIRE", img: "Fire_05.png", d: "設備", a: "自動灑水頭" },
+            { c: "FIRE", img: "Fire_06.png", d: "設備", a: "側壁型灑水頭" },
+            { c: "FIRE", img: "Fire_07.png", d: "設備", a: "排煙口" },
+            { c: "FIRE", img: "Fire_08.png", d: "設備", a: "手動啟動裝置" },
+            { c: "FIRE", img: "Fire_09.png", d: "設備", a: "泡沫噴頭" },
+            { c: "FIRE", img: "Fire_10.png", d: "設備", a: "火警發信機" },
+            { c: "FIRE", img: "Fire_11.png", d: "設備", a: "火警警鈴" },
+            { c: "FIRE", img: "Fire_12.png", d: "設備", a: "火警標示燈" },
+            { c: "FIRE", img: "Fire_13.png", d: "設備", a: "偵煙探測器" },
+            { c: "FIRE", img: "Fire_14.png", d: "設備", a: "偵熱探測器" },
+            { c: "FIRE", img: "Fire_15.png", d: "設備", a: "出口標示燈" },
+            { c: "FIRE", img: "Fire_16.png", d: "設備", a: "避難方向指示燈" },
+            { c: "FIRE", img: "Fire_17.png", d: "設備", a: "室內消防栓箱" },
+            { c: "FIRE", img: "Fire_18.png", d: "設備", a: "連接送水口" },
+            { c: "FIRE", img: "Fire_19.png", d: "設備", a: "消防栓" },
+            { c: "FIRE", img: "Fire_20.png", d: "設備", a: "滅火器" },
+            { c: "FIRE", img: "Fire_21.png", d: "設備", a: "緊急廣播喇叭" },
+            { c: "FIRE", img: "Fire_22.png", d: "設備", a: "緊急電話" },
+            { c: "FIRE", img: "Fire_23.png", d: "代號", a: "普通門(Dn)" },
+            { c: "FIRE", img: "Fire_24.png", d: "代號", a: "防火門(60A)" },
+            { c: "FIRE", img: "Fire_25.png", d: "代號", a: "防火門(60B)" },
+            { c: "FIRE", img: "Fire_26.png", d: "代號", a: "普通窗(Wn)" },
+            { c: "FIRE", img: "Fire_27.png", d: "代號", a: "防火窗" },
+            { c: "FIRE", img: "Fire_28.png", d: "設備", a: "防煙垂壁" },
+            { c: "FIRE", img: "Fire_29.png", d: "設備", a: "排煙設備" },
+            { c: "FIRE", img: "Fire_30.png", d: "設備", a: "進風口" },
+
+            // 空調機械 (Mech)
+            { c: "M", img: "Mech_01.png", d: "管線", a: "冷卻送水管(CWS)" },
+            { c: "M", img: "Mech_02.png", d: "管線", a: "冷卻回水管(CWR)" },
+            { c: "M", img: "Mech_03.png", d: "管線", a: "冰水送水管(CHS)" },
+            { c: "M", img: "Mech_04.png", d: "管線", a: "冰水回水管(CHR)" },
+            { c: "M", img: "Mech_05.png", d: "管線", a: "冷媒送出管(RD)" },
+            { c: "M", img: "Mech_06.png", d: "管線", a: "冷媒吸入管(RS)" },
+            { c: "M", img: "Mech_07.png", d: "管線", a: "冷媒液管(RL)" },
+            { c: "M", img: "Mech_08.png", d: "管線", a: "排水管(D)" },
+            { c: "M", img: "Mech_09.png", d: "風管", a: "供應風管(正壓)" },
+            { c: "M", img: "Mech_10.png", d: "風管", a: "回風風管(負壓)" },
+            { c: "M", img: "Mech_11.png", d: "閘門", a: "電動閘門" },
+            { c: "M", img: "Mech_12.png", d: "閘門", a: "防火閘門" },
+            { c: "M", img: "Mech_13.png", d: "閘門", a: "風量調節閘門(VD)" },
+            { c: "M", img: "Mech_14.png", d: "出風口", a: "擴散型出風口" },
+            { c: "M", img: "Mech_15.png", d: "回風口", a: "回風口/排風口" },
+            { c: "M", img: "Mech_16.png", d: "接頭", a: "伸縮接頭" },
+            { c: "M", img: "Mech_17.png", d: "接頭", a: "軟管" },
+            { c: "M", img: "Mech_18.png", d: "設備", a: "空調箱(AHU)" },
+            { c: "M", img: "Mech_19.png", d: "設備", a: "送風機" },
+            { c: "M", img: "Mech_20.png", d: "設備", a: "排風機" },
+            { c: "M", img: "Mech_21.png", d: "設備", a: "冷卻水塔" },
+            { c: "M", img: "Mech_22.png", d: "設備", a: "冰水主機" },
+            { c: "M", img: "Mech_23.png", d: "設備", a: "分離式冷氣室外機" },
+            { c: "M", img: "Mech_24.png", d: "設備", a: "分離式冷氣室內機" },
+            { c: "M", img: "Mech_25.png", d: "設備", a: "全熱交換器" },
+            { c: "M", img: "Mech_26.png", d: "設備", a: "VAV終端" },
+
+            // 給排水 (Pump)
+            { c: "P", img: "Pump_01.png", d: "管線", a: "排水管(D)" },
+            { c: "P", img: "Pump_02.png", d: "管線", a: "汙水管(S)" },
+            { c: "P", img: "Pump_03.png", d: "管線", a: "通氣管(V)" },
+            { c: "P", img: "Pump_04.png", d: "管線", a: "瓦斯管(G)" },
+            { c: "P", img: "Pump_05.png", d: "管線", a: "雨水排水管(RD)" },
+            { c: "P", img: "Pump_06.png", d: "管線", a: "熱水管(HW)" },
+            { c: "P", img: "Pump_07.png", d: "管線", a: "冷水管(CW)" },
+            { c: "P", img: "Pump_08.png", d: "管線", a: "消防管(F)" },
+            { c: "P", img: "Pump_09.png", d: "閥類", a: "逆止閥" },
+            { c: "P", img: "Pump_10.png", d: "閥類", a: "閘閥" },
+            { c: "P", img: "Pump_11.png", d: "閥類", a: "球型閥" },
+            { c: "P", img: "Pump_12.png", d: "閥類", a: "蝶閥" },
+            { c: "P", img: "Pump_13.png", d: "閥類", a: "安全閥" },
+            { c: "P", img: "Pump_14.png", d: "閥類", a: "減壓閥" },
+            { c: "P", img: "Pump_15.png", d: "閥類", a: "電磁閥" },
+            { c: "P", img: "Pump_16.png", d: "儀表", a: "壓力錶" },
+            { c: "P", img: "Pump_17.png", d: "儀表", a: "溫度計" },
+            { c: "P", img: "Pump_18.png", d: "設備", a: "地板落水頭(FD)" },
+            { c: "P", img: "Pump_19.png", d: "設備", a: "清潔口(CO)" },
+            { c: "P", img: "Pump_20.png", d: "設備", a: "存水彎" },
+            { c: "P", img: "Pump_21.png", d: "衛浴", a: "坐式馬桶" },
+            { c: "P", img: "Pump_22.png", d: "衛浴", a: "蹲式馬桶" },
+            { c: "P", img: "Pump_23.png", d: "衛浴", a: "小便斗" },
+            { c: "P", img: "Pump_24.png", d: "衛浴", a: "洗臉盆" },
+            { c: "P", img: "Pump_25.png", d: "衛浴", a: "浴缸" },
+            { c: "P", img: "Pump_26.png", d: "衛浴", a: "淋浴間" },
+            { c: "P", img: "Pump_27.png", d: "設備", a: "熱水器" },
+            { c: "P", img: "Pump_28.png", d: "設備", a: "水塔" },
+            { c: "P", img: "Pump_29.png", d: "設備", a: "加壓泵浦" },
+            { c: "P", img: "Pump_30.png", d: "設備", a: "污水泵浦" },
+            { c: "P", img: "Pump_31.png", d: "設備", a: "化糞池" },
+            { c: "P", img: "Pump_32.png", d: "配件", a: "接頭" },
+            { c: "P", img: "Pump_33.png", d: "配件", a: "彎頭" },
+            { c: "P", img: "Pump_34.png", d: "配件", a: "三通" },
+            { c: "P", img: "Pump_35.png", d: "配件", a: "Y型接頭" },
+            { c: "P", img: "Pump_36.png", d: "配件", a: "異徑管" },
+            { c: "P", img: "Pump_37.png", d: "配件", a: "法蘭" },
+            { c: "P", img: "Pump_38.png", d: "配件", a: "軟管" },
+
+            // 構造材質 (Rock)
+            { c: "MAT", img: "Rock_01.png", d: "材料剖面", a: "磚牆" },
+            { c: "MAT", img: "Rock_02.png", d: "材料剖面", a: "混凝土" },
+            { c: "MAT", img: "Rock_03.png", d: "材料剖面", a: "鋼筋混凝土" },
+            { c: "MAT", img: "Rock_04.png", d: "材料剖面", a: "石材" },
+            { c: "MAT", img: "Rock_05.png", d: "材料剖面", a: "卵石" },
+            { c: "MAT", img: "Rock_06.png", d: "材料剖面", a: "夯實土/地盤" },
+            { c: "MAT", img: "Rock_07.png", d: "材料剖面", a: "空心磚牆" },
+            { c: "MAT", img: "Rock_08.png", d: "材料剖面", a: "木材(橫斷面)" },
+            { c: "MAT", img: "Rock_09.png", d: "材料剖面", a: "木材(縱斷面)" },
+            { c: "MAT", img: "Rock_10.png", d: "材料剖面", a: "合板" },
+            { c: "MAT", img: "Rock_11.png", d: "材料剖面", a: "玻璃" },
+            { c: "MAT", img: "Rock_12.png", d: "材料剖面", a: "土壤/砂" },
+            { c: "MAT", img: "Rock_13.png", d: "材料剖面", a: "磁磚/馬賽克" },
+            { c: "MAT", img: "Rock_14.png", d: "材料剖面", a: "保溫吸音材料" },
+            { c: "MAT", img: "Rock_15.png", d: "材料剖面", a: "金屬板" },
+            { c: "MAT", img: "Rock_16.png", d: "材料剖面", a: "鋼材" },
+            { c: "MAT", img: "Rock_17.png", d: "材料剖面", a: "砌塊" },
+
+            // 電信弱電 (Tele)
+            { c: "T", img: "Tele_01.png", d: "箱體", a: "總配線箱" },
+            { c: "T", img: "Tele_02.png", d: "箱體", a: "拖線箱" },
+            { c: "T", img: "Tele_03.png", d: "箱體", a: "主配線箱" },
+            { c: "T", img: "Tele_04.png", d: "箱體", a: "支配線箱" },
+            { c: "T", img: "Tele_05.png", d: "出線匣", a: "地板型暗式出線匣" },
+            { c: "T", img: "Tele_06.png", d: "出線匣", a: "壁型暗式出線匣" },
+            { c: "T", img: "Tele_07.png", d: "出線匣", a: "公用電話出線匣" },
+            { c: "T", img: "Tele_08.png", d: "設備", a: "手孔(HH)" },
+            { c: "T", img: "Tele_09.png", d: "設備", a: "總接地箱" },
+            { c: "T", img: "Tele_10.png", d: "管線", a: "電信管線(暗式)" },
+            { c: "T", img: "Tele_11.png", d: "管線", a: "電信管線(明式)" },
+            { c: "T", img: "Tele_12.png", d: "設備", a: "總配線架(MDF)" },
+            { c: "T", img: "Tele_13.png", d: "設備", a: "按鈕開關(PB)" },
+            { c: "T", img: "Tele_14.png", d: "出線口", a: "電視出線口(TV)" },
+            { c: "T", img: "Tele_15.png", d: "管線", a: "電視管線" },
+            { c: "T", img: "Tele_16.png", d: "出線口", a: "對講機出線口(IC)" },
+            { c: "T", img: "Tele_17.png", d: "設備", a: "網路出線口" },
+            { c: "T", img: "Tele_18.png", d: "設備", a: "監視攝影機" },
+            { c: "T", img: "Tele_19.png", d: "設備", a: "門禁感應器" },
+            { c: "T", img: "Tele_20.png", d: "設備", a: "讀卡機" },
+            { c: "T", img: "Tele_21.png", d: "設備", a: "緊急按鈕" },
+            { c: "T", img: "Tele_22.png", d: "出線口", a: "電話出線口" },
+            { c: "T", img: "Tele_23.png", d: "設備", a: "光纖接線盒" },
+            { c: "T", img: "Tele_24.png", d: "設備", a: "資訊插座" },
+            { c: "T", img: "Tele_25.png", d: "設備", a: "集線器" },
+            { c: "T", img: "Tele_26.png", d: "設備", a: "交換機" },
+            { c: "T", img: "Tele_27.png", d: "設備", a: "無線基地台" },
+            { c: "T", img: "Tele_28.png", d: "設備", a: "伺服器機櫃" },
+            { c: "T", img: "Tele_29.png", d: "設備", a: "UPS不斷電系統" },
+            { c: "T", img: "Tele_30.png", d: "管線", a: "弱電管線" },
+            { c: "T", img: "Tele_31.png", d: "設備", a: "弱電配線" },
+            { c: "T", img: "Tele_32.png", d: "設備", a: "中繼器" },
+            { c: "T", img: "Tele_33.png", d: "設備", a: "分接器" },
+            { c: "T", img: "Tele_34.png", d: "設備", a: "監控主機" },
+            { c: "T", img: "Tele_35.png", d: "設備", a: "防盜感應器" },
+            { c: "T", img: "Tele_36.png", d: "設備", a: "警報器" },
+            { c: "T", img: "Tele_37.png", d: "設備", a: "中央監控系統" },
+
+            // 門窗建築 (Windows)
+            { c: "ARCH", img: "Windows_01.png", d: "線型", a: "出入口方向" },
+            { c: "ARCH", img: "Windows_02.png", d: "門圖例", a: "雙向門" },
+            { c: "ARCH", img: "Windows_03.png", d: "門圖例", a: "推開門" },
+            { c: "ARCH", img: "Windows_04.png", d: "門圖例", a: "旋轉門" },
+            { c: "ARCH", img: "Windows_05.png", d: "窗圖例", a: "固定窗" },
+            { c: "ARCH", img: "Windows_06.png", d: "窗圖例", a: "橫拉窗" },
+            { c: "ARCH", img: "Windows_07.png", d: "窗圖例", a: "上下推窗" },
+            { c: "ARCH", img: "Windows_08.png", d: "窗圖例", a: "百葉窗" },
+            { c: "ARCH", img: "Windows_09.png", d: "窗圖例", a: "氣窗" },
+            { c: "ARCH", img: "Windows_10.png", d: "門圖例", a: "單開門" },
+            { c: "ARCH", img: "Windows_11.png", d: "門圖例", a: "雙開門" },
+            { c: "ARCH", img: "Windows_12.png", d: "門圖例", a: "單拉門" },
+            { c: "ARCH", img: "Windows_13.png", d: "門圖例", a: "雙拉門" },
+            { c: "ARCH", img: "Windows_14.png", d: "門圖例", a: "折疊門" },
+            { c: "ARCH", img: "Windows_15.png", d: "門圖例", a: "雙折疊門" },
+            { c: "ARCH", img: "Windows_16.png", d: "樓梯", a: "樓梯圖例" },
+            { c: "ARCH", img: "Windows_17.png", d: "升降機", a: "電梯" },
+            { c: "ARCH", img: "Windows_18.png", d: "坡道", a: "斜坡道" },
+            { c: "ARCH", img: "Windows_19.png", d: "代號", a: "普通門(Dn)" },
+            { c: "ARCH", img: "Windows_20.png", d: "防火", a: "防火門代號" },
+            { c: "ARCH", img: "Windows_21.png", d: "門圖例", a: "捲門" },
+            { c: "ARCH", img: "Windows_22.png", d: "門洞", a: "無門扇之門口" },
+            { c: "ARCH", img: "Windows_23.png", d: "門圖例", a: "收拉門" }
+        ];
+
+        const grid = document.getElementById('quizGrid');
+        const statsDiv = document.getElementById('stats');
+        const searchInput = document.getElementById('searchInput');
+        const buttons = document.querySelectorAll('.filter-group .btn:not(.btn-toggle)');
+        let currentFilter = 'all';
+        let isAllRevealed = false;
+
+        function getCatName(code) {
+            const map = {
+                'CNS': 'CNS圖號', 'ARCH': '建築符號', 'STRUCT': '結構符號',
+                'MAT': '構造材質', 'E': '電氣設備', 'P': '給排水',
+                'M': '空調機械', 'T': '電信弱電', 'FIRE': '消防設備'
+            };
+            return map[code] || code;
+        }
+
+        function renderQuiz() {
+            const searchTerm = searchInput.value.toLowerCase().trim();
+            const filtered = db.filter(item => {
+                const matchFilter = currentFilter === 'all' || item.c === currentFilter;
+                const matchSearch = item.a.toLowerCase().includes(searchTerm) ||
+                    item.d.toLowerCase().includes(searchTerm) ||
+                    (item.q && item.q.toLowerCase().includes(searchTerm));
+                return matchFilter && matchSearch;
+            });
+
+            if (filtered.length === 0) {
+                grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:30px;color:#999;">沒有找到相符的資料</div>';
+            } else {
+                grid.innerHTML = filtered.map(item => `
+            <div class="quiz-card ${isAllRevealed ? 'revealed' : ''}" onclick="this.classList.toggle('revealed')">
+                <div class="card-header">
+                    <span>${getCatName(item.c)}</span>
+                    <span>${item.d}</span>
+                </div>
+                <div class="card-body">
+                    ${item.img ? `<img src="img_CNS/${item.img}" alt="符號">` : `<span class="text-symbol">${item.q || ''}</span>`}
+                </div>
+                <div class="card-answer">${item.a}</div>
+            </div>
+        `).join('');
+            }
+            statsDiv.textContent = `共 ${db.length} 題 / 顯示 ${filtered.length} 題`;
+        }
+
+        window.toggleAll = function () {
+            isAllRevealed = !isAllRevealed;
+            document.querySelectorAll('.quiz-card').forEach(c =>
+                isAllRevealed ? c.classList.add('revealed') : c.classList.remove('revealed'));
+        };
+
+        buttons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                buttons.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentFilter = btn.dataset.filter;
+                renderQuiz();
+            });
+        });
+
+        searchInput.addEventListener('input', renderQuiz);
+        renderQuiz();
+    </script>
+</body>
+
+</html>
