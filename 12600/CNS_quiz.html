@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CNS圖號練習題庫</title>
+    <title>CNS圖號練習題庫 v1.2</title>
     <style>
         :root {
             --accent: #2980b9;
@@ -559,12 +559,48 @@
             { c: "ARCH", img: "Windows_23.png", d: "門圖例", a: "收拉門" }
         ];
 
+        const STORAGE_KEY = 'cns_quiz_state';
         const grid = document.getElementById('quizGrid');
         const statsDiv = document.getElementById('stats');
         const searchInput = document.getElementById('searchInput');
         const buttons = document.querySelectorAll('.filter-group .btn:not(.btn-toggle)');
-        let currentFilter = 'all';
+
+        // 從 localStorage 讀取上次的狀態
+        function loadState() {
+            try {
+                const saved = localStorage.getItem(STORAGE_KEY);
+                if (saved) {
+                    return JSON.parse(saved);
+                }
+            } catch (e) {
+                console.log('無法讀取儲存狀態');
+            }
+            return { filter: 'all' };
+        }
+
+        // 儲存狀態到 localStorage
+        function saveState() {
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify({
+                    filter: currentFilter
+                }));
+            } catch (e) {
+                console.log('無法儲存狀態');
+            }
+        }
+
+        const savedState = loadState();
+        let currentFilter = savedState.filter;
         let isAllRevealed = false;
+
+        // 初始化時設定正確的 active 按鈕
+        buttons.forEach(btn => {
+            if (btn.dataset.filter === currentFilter) {
+                btn.classList.add('active');
+            } else {
+                btn.classList.remove('active');
+            }
+        });
 
         function getCatName(code) {
             const map = {
@@ -615,6 +651,7 @@
                 buttons.forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
                 currentFilter = btn.dataset.filter;
+                saveState();  // 儲存狀態
                 renderQuiz();
             });
         });
@@ -626,17 +663,3 @@
 
 
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
