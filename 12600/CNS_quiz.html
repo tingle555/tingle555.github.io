@@ -133,6 +133,19 @@
             color: #666;
             display: flex;
             justify-content: space-between;
+            align-items: center;
+        }
+
+        .star-btn {
+            font-size: 1rem;
+            color: #bdc3c7;
+            cursor: pointer;
+            transition: color 0.2s;
+            line-height: 1;
+        }
+
+        .star-btn.active {
+            color: #f1c40f;
         }
 
         .card-body {
@@ -209,6 +222,7 @@
                     <button class="btn" data-filter="T">電信弱電</button>
                     <button class="btn" data-filter="FIRE">消防設備</button>
                     <button class="btn" data-filter="MAT">構造材質</button>
+                    <button class="btn" data-filter="unfamiliar">⭐ 不熟標記</button>
                     <button class="btn btn-toggle" onclick="toggleAll()">👁️</button>
                 </div>
             </div>
@@ -560,10 +574,26 @@
         ];
 
         const STORAGE_KEY = 'cns_quiz_state';
+        const UNFAMILIAR_KEY = 'cns_quiz_unfamiliar';
         const grid = document.getElementById('quizGrid');
         const statsDiv = document.getElementById('stats');
         const searchInput = document.getElementById('searchInput');
         const buttons = document.querySelectorAll('.filter-group .btn:not(.btn-toggle)');
+
+        function loadUnfamiliar() {
+            try {
+                const saved = localStorage.getItem(UNFAMILIAR_KEY);
+                return saved ? JSON.parse(saved) : [];
+            } catch (e) {
+                return [];
+            }
+        }
+
+        function saveUnfamiliar() {
+            try {
+                localStorage.setItem(UNFAMILIAR_KEY, JSON.stringify(unfamiliarList));
+            } catch (e) { }
+        }
 
         // 從 localStorage 讀取上次的狀態
         function loadState() {
@@ -592,6 +622,7 @@
         const savedState = loadState();
         let currentFilter = savedState.filter;
         let isAllRevealed = false;
+        let unfamiliarList = loadUnfamiliar();
 
         // 初始化時設定正確的 active 按鈕
         buttons.forEach(btn => {
@@ -611,10 +642,34 @@
             return map[code] || code;
         }
 
+        window.toggleUnfamiliar = function (e, itemId) {
+            e.stopPropagation();
+            const index = unfamiliarList.indexOf(itemId);
+            if (index > -1) {
+                unfamiliarList.splice(index, 1);
+                e.target.classList.remove('active');
+            } else {
+                unfamiliarList.push(itemId);
+                e.target.classList.add('active');
+            }
+            saveUnfamiliar();
+            // 若目前在「不熟」篩選模式且取消打星，為兼顧使用者體驗，不立刻重繪以免卡片瞬間消失
+        };
+
         function renderQuiz() {
             const searchTerm = searchInput.value.toLowerCase().trim();
             const filtered = db.filter(item => {
-                const matchFilter = currentFilter === 'all' || item.c === currentFilter;
+                const itemId = item.c + '|' + (item.q || item.img) + '|' + item.a;
+
+                let matchFilter = false;
+                if (currentFilter === 'all') {
+                    matchFilter = true;
+                } else if (currentFilter === 'unfamiliar') {
+                    matchFilter = unfamiliarList.includes(itemId);
+                } else {
+                    matchFilter = item.c === currentFilter;
+                }
+
                 const matchSearch = item.a.toLowerCase().includes(searchTerm) ||
                     item.d.toLowerCase().includes(searchTerm) ||
                     (item.q && item.q.toLowerCase().includes(searchTerm));
@@ -624,18 +679,21 @@
             if (filtered.length === 0) {
                 grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:30px;color:#999;">沒有找到相符的資料</div>';
             } else {
-                grid.innerHTML = filtered.map(item => `
+                grid.innerHTML = filtered.map(item => {
+                    const itemId = item.c + '|' + (item.q || item.img) + '|' + item.a;
+                    const isUnfamiliar = unfamiliarList.includes(itemId);
+                    return `
             <div class="quiz-card ${isAllRevealed ? 'revealed' : ''}" onclick="this.classList.toggle('revealed')">
                 <div class="card-header">
-                    <span>${getCatName(item.c)}</span>
-                    <span>${item.d}</span>
+                    <span>${getCatName(item.c)} - ${item.d}</span>
+                    <span class="star-btn ${isUnfamiliar ? 'active' : ''}" onclick="toggleUnfamiliar(event, '${itemId}')">★</span>
                 </div>
                 <div class="card-body">
                     ${item.img ? `<img src="img_CNS/${item.img}" alt="符號">` : `<span class="text-symbol">${item.q || ''}</span>`}
                 </div>
                 <div class="card-answer">${item.a}</div>
             </div>
-        `).join('');
+        `}).join('');
             }
             statsDiv.textContent = `共 ${db.length} 題 / 顯示 ${filtered.length} 題`;
         }
@@ -663,5 +721,3 @@
 
 
 </html>
-
-
