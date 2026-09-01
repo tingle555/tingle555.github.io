@@ -1,0 +1,107 @@
+{
+  "currentQuoteId": "quote_sample_72_8f",
+  "version": "v1.3.0",
+  "lastUpdated": "2026-08-12T12:43:00.000Z",
+  "quotations": [
+    {
+      "id": "quote_sample_72_8f",
+      "quoteNo": "DQ-20260810-72",
+      "quoteVersion": "V1",
+      "customerName": "Vincent",
+      "customerPhone": "0912-345-678",
+      "decorAddress": "台北市中山區民權東路一段",
+      "propertyType": "電梯大樓",
+      "quoteDate": "2026-08-10",
+      "validDays": 30,
+      "projectMemo": "社區清潔費、保證金另計",
+      "companyName": "樺曏創意設計有限公司",
+      "bankName": "國泰世華",
+      "bankBranch": "八德分行",
+      "bankAccountName": "樺曏創意設計有限公司",
+      "bankAccountNo": "077035004991",
+      "termsText": "1. 此報價30日內有效\n2. 訂金預付30%，期中款50%、尾款20%\n3. 工程含一年保固",
+      "designFee": 0,
+      "serviceFeePercent": 8,
+      "enableTax": true,
+      "discountName": "專案特惠",
+      "discountAmount": 0,
+      "categories": [
+        {
+          "id": "cat_1",
+          "name": "系統櫃工程",
+          "items": [
+            { "id": "item_1_1", "name": "廚具吊櫃", "spec": "W200, 六面結烤", "qty": 1, "unit": "櫃", "price": 32500, "note": "" },
+            { "id": "item_1_2", "name": "廚具矮櫃 (G型把手、拉籃)", "spec": "W200, 六面結烤", "qty": 1, "unit": "櫃", "price": 32500, "note": "" },
+            { "id": "item_1_3", "name": "人造石檯面", "spec": "含水槽下崁", "qty": 1, "unit": "組", "price": 17000, "note": "" },
+            { "id": "item_1_4", "name": "櫻花油煙機 70cm", "spec": "R3012S", "qty": 1, "unit": "台", "price": 6800, "note": "" },
+            { "id": "item_1_5", "name": "櫻花IH爐 (單口)", "spec": "EG2120AG (220v)", "qty": 1, "unit": "台", "price": 8200, "note": "" },
+            { "id": "item_1_6", "name": "櫻花烘碗機 60cm", "spec": "Q600C", "qty": 1, "unit": "台", "price": 7500, "note": "" },
+            { "id": "item_1_7", "name": "功林水槽+龍頭", "spec": "KL-302/ST-7008", "qty": 1, "unit": "組", "price": 4100, "note": "" },
+            { "id": "item_1_8", "name": "安裝搬運費", "spec": "", "qty": 1, "unit": "式", "price": 4500, "note": "" }
+          ]
+        },
+        {
+          "id": "cat_2",
+          "name": "拆除工程",
+          "items": [
+            { "id": "item_2_1", "name": "櫥櫃拆除（8尺內）", "spec": "", "qty": 1, "unit": "式", "price": 8000, "note": "" },
+            { "id": "item_2_2", "name": "垃圾清運", "spec": "", "qty": 1, "unit": "式", "price": 4000, "note": "" }
+          ]
+        },
+        {
+          "id": "cat_3",
+          "name": "水電工程",
+          "items": [
+            { "id": "item_3_1", "name": "吸頂燈含安裝 50W", "spec": "舞光D-CEN50DM", "qty": 1, "unit": "件", "price": 2800, "note": "" },
+            { "id": "item_3_2", "name": "櫥櫃排煙管安裝", "spec": "", "qty": 1, "unit": "式", "price": 8000, "note": "" },
+            { "id": "item_3_3", "name": "插座面板更換", "spec": "", "qty": 3, "unit": "個", "price": 500, "note": "" },
+            { "id": "item_3_4", "name": "新增崁燈含開關", "spec": "(15cm自然光)", "qty": 1, "unit": "式", "price": 2000, "note": "" }
+          ]
+        },
+        {
+          "id": "cat_4",
+          "name": "門窗工程",
+          "items": [
+            { "id": "item_4_1", "name": "PVC摺疊拉門", "spec": "240*200", "qty": 1, "unit": "式", "price": 8000, "note": "" }
+          ]
+        },
+        {
+          "id": "cat_5",
+          "name": "玻璃工程",
+          "items": [
+            { "id": "item_5_1", "name": "廚房烤漆玻璃", "spec": "", "qty": 25, "unit": "才", "price": 450, "note": "" }
+          ]
+        },
+        {
+          "id": "cat_6",
+          "name": "假設工程",
+          "items": [
+            { "id": "item_6_1", "name": "公共空間保護", "spec": "走道地面、電梯", "qty": 1, "unit": "式", "price": 8000, "note": "社區清潔費、保證金另計" }
+          ]
+        },
+        {
+          "id": "cat_7",
+          "name": "油漆工程",
+          "items": [
+            { "id": "item_7_1", "name": "全室油漆(一底二度)", "spec": "虹牌全效乳膠漆", "qty": 36, "unit": "坪", "price": 1200, "note": "批土、修補另計" }
+          ]
+        },
+        {
+          "id": "cat_8",
+          "name": "地板工程",
+          "items": [
+            { "id": "item_8_1", "name": "超耐磨木地板", "spec": "Egger標準版", "qty": 11, "unit": "坪", "price": 4600, "note": "含損料" },
+            { "id": "item_8_2", "name": "貼工", "spec": "", "qty": 1, "unit": "工", "price": 3000, "note": "" }
+          ]
+        },
+        {
+          "id": "cat_9",
+          "name": "清潔工程",
+          "items": [
+            { "id": "item_9_1", "name": "全室細清", "spec": "", "qty": 12, "unit": "坪", "price": 800, "note": "" }
+          ]
+        }
+      ]
+    }
+  ]
+}
