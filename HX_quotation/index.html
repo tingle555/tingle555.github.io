@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="zh-TW" data-theme="light">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>室內裝修報價單管理系統 - 樺曏創意設計</title>
+  <meta name="description" content="專業室內裝修報價單管理系統，支援項目新增修改刪除、工程小計自動計算、監工服務費與稅額計算、A4 報價單列印匯出。">
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+
+  <!-- App Header -->
+  <header class="app-header">
+    <div class="brand">
+      <div class="brand-icon">
+        <i class="fa-solid fa-compass-drafting"></i>
+      </div>
+      <div>
+        <div style="display: flex; align-items: center; gap: 0.5rem;">
+          <div class="brand-title">裝修報價單管理系統</div>
+          <span class="version-badge" onclick="openChangelogModal()" title="點擊查看版本歷史與更新紀錄">v1.3.1</span>
+        </div>
+        <div class="brand-subtitle">Interior Quotation Studio</div>
+      </div>
+    </div>
+
+    <!-- Header Central Navigation & View Switcher -->
+    <div class="view-tabs no-print">
+      <button class="tab-btn active" id="btnModeEdit" onclick="setAppMode('edit')">
+        <i class="fa-solid fa-pen-to-square"></i> 編輯模式
+      </button>
+      <button class="tab-btn" id="btnModeSplit" onclick="setAppMode('split')">
+        <i class="fa-solid fa-columns"></i> 雙欄對照
+      </button>
+      <button class="tab-btn" id="btnModePreview" onclick="setAppMode('preview')">
+        <i class="fa-solid fa-file-invoice"></i> 報價單預覽
+      </button>
+    </div>
+
+    <!-- Header Actions -->
+    <div class="header-actions no-print">
+      <button class="btn btn-secondary btn-sm" onclick="exportCsvFile()" title="開啟資料夾選擇路徑匯出 CSV 表格檔">
+        <i class="fa-solid fa-file-csv" style="color: var(--accent-amber);"></i> 匯出 CSV
+      </button>
+      <button class="btn btn-secondary btn-sm" onclick="triggerJsonFileInput()" title="開啟資料夾選擇 .json 檔匯入">
+        <i class="fa-solid fa-file-import" style="color: var(--accent-amber);"></i> 匯入 JSON
+      </button>
+      <button class="btn btn-secondary btn-sm" onclick="downloadJsonFile()" title="開啟資料夾選擇路徑匯出 JSON 檔">
+        <i class="fa-solid fa-file-code" style="color: var(--accent-amber);"></i> 匯出 JSON
+      </button>
+      <button class="btn btn-primary btn-sm" onclick="triggerPrint()" title="列印或儲存為 A4 PDF 報價單">
+        <i class="fa-solid fa-print"></i> 列印
+      </button>
+      <button class="btn btn-secondary btn-sm" onclick="loadSampleData()" title="載入「民權東路一段72號八樓」範例資料">
+        <i class="fa-solid fa-wand-magic-sparkles"></i> 載入範例
+      </button>
+      <button class="btn btn-secondary btn-icon" id="btnThemeToggle" onclick="toggleTheme()" title="切換深色/淺色主題">
+        <i class="fa-solid fa-moon"></i>
+      </button>
+    </div>
+  </header>
+
+  <!-- Hidden File Input for JSON import -->
+  <input type="file" id="modalJsonFileInput" accept=".json" style="display: none;" onchange="handleModalJsonFileSelect(event)">
+
+  <!-- Main Container -->
+  <main class="app-container" id="appContainer">
+
+    <!-- ==================== LEFT COLUMN: EDITOR ==================== -->
+    <section class="editor-section no-print" id="editorSection">
+
+      <!-- 1. Client & Project Info Card -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">
+            <i class="fa-solid fa-user-gear"></i> 客戶與專案基本資訊
+          </div>
+          <button class="btn btn-secondary btn-sm" onclick="resetClientInfo()">
+            <i class="fa-solid fa-rotate-left"></i> 重設
+          </button>
+        </div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label" for="quoteNo">報價單號</label>
+            <input type="text" class="form-control" id="quoteNo" placeholder="如：DQ-20260810-01"
+              oninput="updateStateFromForm()">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="quoteVersion">報價單版號</label>
+            <input type="text" class="form-control" id="quoteVersion" placeholder="如：V1"
+              oninput="updateStateFromForm()">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="customerName">客戶姓名</label>
+            <input type="text" class="form-control" id="customerName" placeholder="如：Vincent"
+              oninput="updateStateFromForm()">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="customerPhone">手機號碼</label>
+            <input type="text" class="form-control" id="customerPhone" placeholder="如：0912-345-678"
+              oninput="updateStateFromForm()">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="propertyType">建物類型</label>
+            <select class="form-control" id="propertyType" onchange="updateStateFromForm()">
+              <option value="電梯大樓">電梯大樓</option>
+              <option value="公寓">傳統公寓</option>
+              <option value="透天厝/別墅">透天厝/別墅</option>
+              <option value="商業空間">商業空間</option>
+              <option value="預售屋/新成屋">預售屋/新成屋</option>
+            </select>
+          </div>
+          <div class="form-group full-width">
+            <label class="form-label" for="decorAddress">裝修地址</label>
+            <input type="text" class="form-control" id="decorAddress" placeholder="如：台北市中山區民權東路一段72號八樓"
+              oninput="updateStateFromForm()">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="quoteDate">報價日期</label>
+            <input type="date" class="form-control" id="quoteDate" onchange="updateStateFromForm()">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="validDays">有效天數 (日)</label>
+            <input type="number" class="form-control" id="validDays" value="30" min="1" oninput="updateStateFromForm()">
+          </div>
+          <div class="form-group full-width">
+            <label class="form-label" for="projectMemo">專案備註 / 說明</label>
+            <input type="text" class="form-control" id="projectMemo" placeholder="例如：社區清潔費、保證金另計"
+              oninput="updateStateFromForm()">
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. Quotation Items & Categories Editor -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">
+            <i class="fa-solid fa-list-check"></i> 工程項目與金額明細
+          </div>
+          <div style="display: flex; gap: 0.5rem;">
+            <button class="btn btn-secondary btn-sm" onclick="openPresetItemsModal()">
+              <i class="fa-solid fa-book-open"></i> 標準工種庫
+            </button>
+            <button class="btn btn-primary btn-sm" onclick="addCategory()">
+              <i class="fa-solid fa-plus"></i> 新增工種分類
+            </button>
+          </div>
+        </div>
+
+        <!-- Dynamic Categories & Items Container -->
+        <div id="categoriesContainer">
+          <!-- Categories cards rendered dynamically via app.js -->
+        </div>
+      </div>
+
+      <!-- 3. Fee & Tax Calculation Panel -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">
+            <i class="fa-solid fa-calculator"></i> 費用摘要與計算設定
+          </div>
+        </div>
+        <div class="form-grid" style="margin-bottom: 1.25rem;">
+          <div class="form-group">
+            <label class="form-label" for="designFee">設計費 ($)</label>
+            <input type="number" class="form-control" id="designFee" value="0" min="0" oninput="updateStateFromForm()">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="serviceFeePercent">工程服務費 (%)</label>
+            <input type="number" class="form-control" id="serviceFeePercent" value="8" min="0" max="100" step="0.5"
+              oninput="updateStateFromForm()">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="enableTax">營業稅 (5%)</label>
+            <select class="form-control" id="enableTax" onchange="updateStateFromForm()">
+              <option value="true" selected>開立發票 (+5%)</option>
+              <option value="false">免開立發票 (0%)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="discountName">優惠名稱</label>
+            <input type="text" class="form-control" id="discountName" value="專案特惠" placeholder="如：專案特惠 / 簽約折抵"
+              oninput="updateStateFromForm()">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="discountAmount">優惠金額 ($)</label>
+            <input type="number" class="form-control" id="discountAmount" value="0" min="0"
+              oninput="updateStateFromForm()">
+          </div>
+        </div>
+
+        <!-- Real-time Cost Calculation Live Summary Panel -->
+        <div class="summary-panel">
+          <div class="summary-row">
+            <span class="label">工程項目小計:</span>
+            <span class="value" id="calcEngSubtotal">$0</span>
+          </div>
+          <div class="summary-row">
+            <span class="label">設計費:</span>
+            <span class="value" id="calcDesignFee">$0</span>
+          </div>
+          <div class="summary-row">
+            <span class="label">工程服務費 / 監工費 (<span id="calcServiceRate">8</span>%):</span>
+            <span class="value" id="calcServiceFee">$0</span>
+          </div>
+          <div class="summary-row">
+            <span class="label">未稅總金額:</span>
+            <span class="value" id="calcUntaxedTotal">$0</span>
+          </div>
+          <div class="summary-row">
+            <span class="label">營業稅 (5%):</span>
+            <span class="value" id="calcTaxFee">$0</span>
+          </div>
+          <div class="summary-row">
+            <span class="label">報價總額 (含稅):</span>
+            <span class="value" id="calcGrandTotal">$0</span>
+          </div>
+          <div class="summary-row" id="calcDiscountRow">
+            <span class="label" id="calcDiscountName">專案特惠:</span>
+            <span class="value" id="calcDiscountAmount" style="color: var(--color-danger); font-weight: 600;">-$0</span>
+          </div>
+          <div class="summary-row total-row">
+            <span class="label">實收總額 (折後):</span>
+            <span class="value" id="calcFinalTotal">$0</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4. Company Info, Terms & Signature Settings -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">
+            <i class="fa-solid fa-building-columns"></i> 公司資訊與條款設定
+          </div>
+        </div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label" for="companyName">公司名稱</label>
+            <input type="text" class="form-control" id="companyName" value="樺曏創意設計有限公司" oninput="updateStateFromForm()">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="bankName">匯款銀行</label>
+            <input type="text" class="form-control" id="bankName" value="國泰世華" oninput="updateStateFromForm()">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="bankBranch">分行名稱</label>
+            <input type="text" class="form-control" id="bankBranch" value="八德分行" oninput="updateStateFromForm()">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="bankAccountName">戶名</label>
+            <input type="text" class="form-control" id="bankAccountName" value="樺曏創意設計有限公司"
+              oninput="updateStateFromForm()">
+          </div>
+          <div class="form-group full-width">
+            <label class="form-label" for="bankAccountNo">帳號</label>
+            <input type="text" class="form-control" id="bankAccountNo" value="077035004991"
+              oninput="updateStateFromForm()">
+          </div>
+          <div class="form-group full-width">
+            <label class="form-label" for="termsText">報價單說明條款</label>
+            <textarea class="form-control" id="termsText" rows="3" oninput="updateStateFromForm()">1. 此報價30日內有效
+2. 訂金預付30%，期中款50%、尾款20%
+3. 工程含一年保固</textarea>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">
+            <i class="fa-solid fa-file-export"></i> 檔案匯出與列印專區
+          </div>
+        </div>
+        <div style="display: flex; flex-wrap: wrap; gap: 0.85rem;">
+          <button class="btn btn-primary" onclick="triggerPrint()" title="列印或儲存為 A4 PDF 報價單" style="flex: 1; min-width: 130px;">
+            <i class="fa-solid fa-print"></i> 列印
+          </button>
+          <button class="btn btn-secondary" onclick="exportCsvFile()" title="開啟資料夾選擇路徑匯出 CSV 表格檔" style="flex: 1; min-width: 130px;">
+            <i class="fa-solid fa-file-csv" style="color: var(--accent-amber);"></i> 匯出 CSV
+          </button>
+          <button class="btn btn-secondary" onclick="downloadJsonFile()" title="開啟資料夾選擇路徑匯出 JSON 檔" style="flex: 1; min-width: 130px;">
+            <i class="fa-solid fa-file-code" style="color: var(--accent-amber);"></i> 匯出 JSON
+          </button>
+          <button class="btn btn-secondary" onclick="triggerJsonFileInput()" title="開啟資料夾選擇 .json 檔匯入" style="flex: 1; min-width: 130px;">
+            <i class="fa-solid fa-file-import" style="color: var(--accent-amber);"></i> 匯入 JSON
+          </button>
+          <button class="btn btn-secondary" onclick="loadSampleData()" title="載入「民權東路一段72號八樓」範例資料" style="flex: 1; min-width: 130px;">
+            <i class="fa-solid fa-wand-magic-sparkles"></i> 載入範例
+          </button>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ==================== RIGHT COLUMN: LIVE PREVIEW ==================== -->
+    <section class="preview-section" id="previewSection" style="display: none;">
+      <div class="preview-container">
+
+        <!-- Standard A4 Printed Quote Paper Format -->
+        <div class="quote-paper" id="quotePaper">
+          <div class="quote-header-title" id="prevCompanyName">樺曏創意設計有限公司</div>
+          <div
+            style="text-align: center; font-size: 14pt; font-weight: 700; color: #334155; margin-bottom: 14px; letter-spacing: 0.1em;">
+            工程報價單
+          </div>
+
+          <!-- Top Client / Info Grid -->
+          <div class="info-grid">
+            <div>
+              <div class="info-item"><span class="info-label">客戶姓名：</span><span class="info-val"
+                  id="prevCustomerName">Vincent</span></div>
+              <div class="info-item"><span class="info-label">聯絡電話：</span><span class="info-val"
+                  id="prevCustomerPhone">0912-345-678</span></div>
+              <div class="info-item"><span class="info-label">裝修地址：</span><span class="info-val"
+                  id="prevDecorAddress">台北市中山區民權東路一段72號八樓</span></div>
+              <div class="info-item"><span class="info-label">建物類型：</span><span class="info-val"
+                  id="prevPropertyType">電梯大樓</span></div>
+            </div>
+            <div>
+              <div class="info-item"><span class="info-label">報價單號：</span><span class="info-val"
+                  id="prevQuoteNo">DQ-20260810-01</span></div>
+              <div class="info-item"><span class="info-label">報價版號：</span><span class="info-val"
+                  id="prevQuoteVersion">V1</span></div>
+              <div class="info-item"><span class="info-label">報價日期：</span><span class="info-val"
+                  id="prevQuoteDate">2026-08-10</span></div>
+              <div class="info-item"><span class="info-label">有效日期：</span><span class="info-val"
+                  id="prevValidDate">2026-09-09</span></div>
+              <div class="info-item"><span class="info-label">備註說明：</span><span class="info-val"
+                  id="prevProjectMemo">社區清潔費、保證金另計</span></div>
+            </div>
+          </div>
+
+          <!-- Items Table -->
+          <table class="preview-table">
+            <thead>
+              <tr>
+                <th style="width: 8%; white-space: nowrap;">項次</th>
+                <th style="width: 14%;">工種</th>
+                <th style="width: 24%;">項目名稱</th>
+                <th style="width: 19%;">規格說明</th>
+                <th style="width: 7%;">數量</th>
+                <th style="width: 7%;">單位</th>
+                <th style="width: 9%;">單價</th>
+                <th style="width: 12%;">複價(元)</th>
+              </tr>
+            </thead>
+            <tbody id="prevItemsBody">
+              <!-- Dynamically populated from JS -->
+            </tbody>
+          </table>
+
+          <!-- Bottom Cost Summary Block -->
+          <div class="summary-block">
+            <table class="summary-table">
+              <tr>
+                <td class="sum-label">工程小計</td>
+                <td class="sum-val" id="prevEngSubtotal">$0</td>
+              </tr>
+              <tr>
+                <td class="sum-label">設計費</td>
+                <td class="sum-val" id="prevDesignFee">$0</td>
+              </tr>
+              <tr>
+                <td class="sum-label">工程服務費 (<span id="prevServiceRate">8</span>%)</td>
+                <td class="sum-val" id="prevServiceFee">$0</td>
+              </tr>
+              <tr>
+                <td class="sum-label">未稅金額</td>
+                <td class="sum-val" id="prevUntaxedTotal">$0</td>
+              </tr>
+              <tr>
+                <td class="sum-label">營業稅 (5%)</td>
+                <td class="sum-val" id="prevTaxFee">$0</td>
+              </tr>
+              <tr>
+                <td class="sum-label">報價總額 (含稅)</td>
+                <td class="sum-val" id="prevGrandTotal">$0</td>
+              </tr>
+              <tr id="prevDiscountRow">
+                <td class="sum-label" id="prevDiscountName">專案特惠</td>
+                <td class="sum-val" id="prevDiscountAmount" style="color: #dc2626;">-$0</td>
+              </tr>
+              <tr class="grand-total">
+                <td class="sum-label">實收總額</td>
+                <td class="sum-val" id="prevFinalTotal">$0</td>
+              </tr>
+            </table>
+          </div>
+
+          <!-- Notes & Terms -->
+          <div class="notes-block">
+            <div class="notes-title">報價條款與說明：</div>
+            <div id="prevTermsText" style="white-space: pre-line; line-height: 1.6;">
+              1. 此報價30日內有效
+              2. 訂金預付30%，期中款50%、尾款20%
+              3. 工程含一年保固
+            </div>
+          </div>
+
+          <!-- Payment Info -->
+          <div class="notes-block" style="background: #f1f5f9;">
+            <div class="notes-title">匯款帳號資訊：</div>
+            <div>
+              銀行：<span id="prevBankName" style="font-weight: 600;">國泰世華</span>
+              (<span id="prevBankBranch">八德分行</span>) &nbsp;|&nbsp;
+              戶名：<span id="prevBankAccountName" style="font-weight: 600;">樺曏創意設計有限公司</span> &nbsp;|&nbsp;
+              帳號：<span id="prevBankAccountNo" style="font-weight: 700; font-family: monospace;">077035004991</span>
+            </div>
+          </div>
+
+          <!-- Signatures -->
+          <div class="signature-grid">
+            <div class="signature-box">
+              <strong>公司簽章</strong>
+              <div style="margin-top: 8px; display: flex; justify-content: center; align-items: center; min-height: 170px;">
+                <img src="公司章.jpg" alt="公司簽章" style="max-height: 170px; max-width: 300px; object-fit: contain;" onerror="this.style.display='none'">
+              </div>
+            </div>
+            <div class="signature-box">
+              <strong>客戶簽章</strong>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ==================== MODALS ==================== -->
+
+  <!-- Modal 1: Preset Standard Items Catalog -->
+  <div class="modal-overlay" id="presetModal">
+    <div class="modal-container">
+      <div class="modal-header">
+        <h3 style="display: flex; align-items: center; gap: 0.5rem;">
+          <i class="fa-solid fa-boxes-stacked" style="color: var(--accent-amber);"></i>
+          常用裝修工種與標準項目庫
+        </h3>
+        <button class="btn btn-secondary btn-icon" onclick="closePresetItemsModal()">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 1rem;">
+          點擊下方項目可快速引進至目前的報價單中：
+        </p>
+        <div class="preset-grid" id="presetItemsGrid">
+          <!-- Populated from JS -->
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closePresetItemsModal()">關閉</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 2: Saved Quotes Manager & Integrated JSON Import -->
+  <div class="modal-overlay" id="savedQuotesModal">
+    <div class="modal-container">
+      <!-- Hidden File Input for selecting JSON file path -->
+      <input type="file" id="modalJsonFileInput" accept=".json" style="display: none;" onchange="handleModalJsonFileSelect(event)">
+      
+      <div class="modal-header">
+        <h3><i class="fa-solid fa-folder-open" style="color: var(--accent-amber);"></i> 專案庫、歷史紀錄與 JSON 匯入</h3>
+        <button class="btn btn-secondary btn-icon" onclick="closeSavedQuotesModal()">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem;">
+          <span style="font-size: 0.9rem; color: var(--text-muted);">專案庫備份管理與 JSON 檔案載入：</span>
+          <div style="display: flex; gap: 0.5rem;">
+            <button class="btn btn-primary btn-sm" onclick="createNewQuote()">
+              <i class="fa-solid fa-file-circle-plus"></i> 新增空白報價單
+            </button>
+            <button class="btn btn-secondary btn-sm" onclick="triggerJsonFileInput()">
+              <i class="fa-solid fa-file-import" style="color: var(--accent-amber);"></i> 選擇 JSON 檔案載入
+            </button>
+            <button class="btn btn-secondary btn-sm" onclick="toggleJsonTextPanel()">
+              <i class="fa-solid fa-code"></i> JSON 文字/貼上
+            </button>
+          </div>
+        </div>
+
+        <!-- Drag and Drop Dropzone -->
+        <div class="json-dropzone" id="jsonDropzone" 
+             ondragover="handleJsonDragOver(event)" 
+             ondragleave="handleJsonDragLeave(event)" 
+             ondrop="handleJsonDrop(event)"
+             onclick="triggerJsonFileInput()">
+          <i class="fa-solid fa-cloud-arrow-up" style="font-size: 2.2rem; color: var(--accent-amber); margin-bottom: 0.5rem;"></i>
+          <div style="font-weight: 600; font-size: 0.95rem; color: var(--text-main);">
+            點擊選擇 JSON 檔案路徑，或將 .json 備份檔拖曳至此處
+          </div>
+          <div style="font-size: 0.78rem; color: var(--text-dim); margin-top: 0.25rem;">
+            支援單筆報價單 JSON 檔或整包專案庫 quotations_db.json 檔
+          </div>
+        </div>
+
+        <!-- Collapsible JSON Text Panel -->
+        <div id="jsonTextPanel" style="display: none; margin-bottom: 1.25rem; background: var(--bg-card); padding: 1rem; border-radius: var(--radius-md); border: 1px solid var(--border-color);">
+          <div class="form-group" style="margin-bottom: 0.75rem;">
+            <label class="form-label" for="jsonTextArea">JSON 資料備份與貼上匯入</label>
+            <textarea class="form-control" id="jsonTextArea" rows="6"
+              style="font-family: var(--font-mono); font-size: 0.8rem;" placeholder="貼上 JSON 報價單資料內容..."></textarea>
+          </div>
+          <div style="display: flex; gap: 0.75rem;">
+            <button class="btn btn-primary btn-sm" onclick="importJsonText()">
+              <i class="fa-solid fa-file-import"></i> 載入文字 JSON
+            </button>
+            <button class="btn btn-secondary btn-sm" onclick="copyJsonText()">
+              <i class="fa-solid fa-copy"></i> 複製目前 JSON
+            </button>
+            <button class="btn btn-secondary btn-sm" onclick="downloadJsonFile()">
+              <i class="fa-solid fa-download"></i> 下載 JSON 檔
+            </button>
+          </div>
+        </div>
+
+        <div id="savedQuotesList" style="display: flex; flex-direction: column; gap: 0.75rem;">
+          <!-- Populated from JS -->
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeSavedQuotesModal()">關閉</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 3: Import / Export JSON (Retained for backup compatibility) -->
+  <div class="modal-overlay" id="importExportModal">
+    <div class="modal-container">
+      <div class="modal-header">
+        <h3><i class="fa-solid fa-file-import" style="color: var(--accent-amber);"></i> 報價單資料 匯入 / 匯出</h3>
+        <button class="btn btn-secondary btn-icon" onclick="closeImportExportModal()">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group" style="margin-bottom: 1rem;">
+          <label class="form-label" for="jsonTextAreaModal3">JSON 資料備份與文字匯入</label>
+          <textarea class="form-control" id="jsonTextAreaModal3" rows="8"
+            style="font-family: var(--font-mono); font-size: 0.8rem;"></textarea>
+        </div>
+        <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+          <button class="btn btn-primary btn-sm" onclick="importJsonTextModal3()">
+            <i class="fa-solid fa-file-import"></i> 載入此 JSON
+          </button>
+          <button class="btn btn-secondary btn-sm" onclick="copyJsonText()">
+            <i class="fa-solid fa-copy"></i> 複製 JSON 文字
+          </button>
+          <button class="btn btn-secondary btn-sm" onclick="downloadJsonFile()">
+            <i class="fa-solid fa-download"></i> 下載 .json 檔案
+          </button>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeImportExportModal()">關閉</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 4: Version Changelog Modal -->
+  <div class="modal-overlay" id="changelogModal">
+    <div class="modal-container">
+      <div class="modal-header">
+        <h3 style="display: flex; align-items: center; gap: 0.5rem;">
+          <i class="fa-solid fa-code-branch" style="color: var(--accent-amber);"></i>
+          版本說明與改版更新紀錄 (Changelog)
+        </h3>
+        <button class="btn btn-secondary btn-icon" onclick="closeChangelogModal()">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+      <div class="modal-body" style="line-height: 1.7;">
+        <div style="background: var(--bg-input); padding: 1rem; border-radius: var(--radius-md); border-left: 4px solid var(--accent-amber); margin-bottom: 1rem;">
+          <div style="font-weight: 700; color: var(--accent-amber); font-size: 1.05rem;">
+            v1.3.1 (2026-08-12 最新版本)
+          </div>
+          <ul style="margin-left: 1.25rem; font-size: 0.88rem; color: var(--text-main); margin-top: 0.4rem;">
+            <li><strong>PDF 預設檔名優化</strong>：將匯出 / 列印成 PDF 之預設檔名自動設定為 `[報價單號]_[裝修地址]_公司名稱.pdf`。</li>
+          </ul>
+        </div>
+
+        <div style="background: var(--bg-input); padding: 1rem; border-radius: var(--radius-md); border-left: 4px solid #64748b; margin-bottom: 1rem;">
+          <div style="font-weight: 700; color: var(--text-main); font-size: 0.95rem;">
+            v1.3.0 (2026-08-12)
+          </div>
+          <ul style="margin-left: 1.25rem; font-size: 0.85rem; color: var(--text-muted); margin-top: 0.4rem;">
+            <li><strong>整合「專案庫與紀錄」與「JSON 匯入」</strong>：將「匯入 JSON」與「專案庫與紀錄」按鈕與功能完美整合至同一專案管理中心。</li>
+            <li><strong>選擇 JSON 檔案路徑與載入</strong>：支援點擊「選擇 JSON 檔案載入」瀏覽並載入任意路徑下的 .json 報價單備份檔，亦支援拖曳檔案即刻載入。</li>
+            <li><strong>即時同步專案庫與共享檔</strong>：匯入之 JSON 資料將自動套用至編輯器，並同步紀錄至 LocalStorage 與 `data/quotations_db.json`。</li>
+            <li><strong>版號同步與介面修復</strong>：更新系統版本號至 v1.3.0，修復匯入彈出視窗閉合結構與優化按鈕樣式。</li>
+          </ul>
+        </div>
+
+        <div style="background: var(--bg-input); padding: 1rem; border-radius: var(--radius-md); border-left: 4px solid #64748b; margin-bottom: 1rem;">
+          <div style="font-weight: 700; color: var(--text-main); font-size: 0.95rem;">
+            v1.2.0 (2026-08-11)
+          </div>
+          <ul style="margin-left: 1.25rem; font-size: 0.85rem; color: var(--text-muted); margin-top: 0.4rem;">
+            <li><strong>新增 CSV 匯出功能</strong>：支援一鍵匯出 Excel UTF-8 BOM (.csv) 格式報價單，表格中文排版無亂碼。</li>
+            <li><strong>跨瀏覽器專案檔共享 (`data/quotations_db.json`)</strong>：支援同資料夾專案檔，不同瀏覽器 (Edge, Chrome, Firefox 等) 均可同步讀寫同一份報價單資料。</li>
+            <li><strong>工程與細項「項次序號 (1, 2, 3...)」</strong>：工程類別與細項表格全面增加項次編號，方便確認排序與總數量。</li>
+            <li><strong>開發版本號註記</strong>：新增 Header 與頁尾 Version Badge (v1.2.0) 及更新日誌視窗。</li>
+          </ul>
+        </div>
+
+        <div style="background: var(--bg-input); padding: 1rem; border-radius: var(--radius-md); border-left: 4px solid #475569; margin-bottom: 1rem;">
+          <div style="font-weight: 700; color: var(--text-main); font-size: 0.95rem;">
+            v1.1.0 (2026-08-10)
+          </div>
+          <ul style="margin-left: 1.25rem; font-size: 0.85rem; color: var(--text-muted); margin-top: 0.4rem;">
+            <li>工程分類新增【上移 ↑】與【下移 ↓】區塊排序按鈕。</li>
+            <li>標頭整合常用工程種類下拉選單 (系統櫃、拆除、水電、泥作、木作等)。</li>
+            <li>預設檢視切換為編輯模式，固定頂部 Header 高度為 60px。</li>
+            <li>優化雙欄模式欄位寬度與項目 Drag & Drop 拖曳功能。</li>
+          </ul>
+        </div>
+
+        <div style="background: var(--bg-input); padding: 1rem; border-radius: var(--radius-md); border-left: 4px solid #334155;">
+          <div style="font-weight: 700; color: var(--text-main); font-size: 0.95rem;">
+            v1.0.0 (2026-08-10)
+          </div>
+          <ul style="margin-left: 1.25rem; font-size: 0.85rem; color: var(--text-muted); margin-top: 0.4rem;">
+            <li>裝修報價單管理系統首發版（完全參考《報價單_民權東路一段72號八樓.xlsx》）。</li>
+          </ul>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeChangelogModal()">關閉</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+
+</html>
