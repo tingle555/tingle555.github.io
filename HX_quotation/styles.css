@@ -459,9 +459,38 @@ textarea.form-control {
 
 .category-subtotal {
   font-family: var(--font-mono);
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   font-weight: 600;
   color: var(--text-main);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.category-cost-input {
+  width: 90px;
+  padding: 0.25rem 0.45rem;
+  background: var(--bg-input);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  color: var(--text-main);
+  font-family: var(--font-mono);
+  font-size: 0.88rem;
+  text-align: right;
+  -moz-appearance: textfield;
+}
+
+.category-cost-input::-webkit-inner-spin-button,
+.category-cost-input::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.category-cost-input:focus {
+  outline: none;
+  border-color: var(--accent-amber);
+  box-shadow: 0 0 0 2px var(--accent-glow);
 }
 
 /* Items Table inside Category Card */
@@ -474,6 +503,20 @@ textarea.form-control {
   min-width: 680px;
   border-collapse: collapse;
   font-size: 0.875rem;
+}
+
+.profit-positive {
+  color: var(--color-success) !important;
+  font-weight: 600;
+}
+
+.profit-negative {
+  color: var(--color-danger) !important;
+  font-weight: 600;
+}
+
+.profit-zero {
+  color: var(--text-muted);
 }
 
 .items-table th {
@@ -867,14 +910,33 @@ textarea.form-control {
 .quote-paper .text-center { text-align: center; }
 .quote-paper .text-right { text-align: right; }
 
+.quote-paper .bottom-flex-block {
+  display: flex;
+  gap: 16px;
+  align-items: stretch;
+  margin-bottom: 16px;
+}
+
+.quote-paper .terms-flex-item {
+  flex: 1;
+  margin-bottom: 0;
+  box-sizing: border-box;
+}
+
+.quote-paper .summary-flex-item {
+  width: 280px;
+  flex-shrink: 0;
+  margin-bottom: 0;
+}
+
 .quote-paper .summary-block {
   display: flex;
   justify-content: flex-end;
-  margin-bottom: 20px;
+  margin-bottom: 0;
 }
 
 .quote-paper .summary-table {
-  width: 280px;
+  width: 100%;
   border-collapse: collapse;
   font-size: 9.5pt;
 }
@@ -906,7 +968,7 @@ textarea.form-control {
   border: 1px solid #cbd5e1;
   border-radius: 4px;
   padding: 10px 14px;
-  margin-bottom: 20px;
+  margin-bottom: 16px;
   background: #fafafa;
 }
 

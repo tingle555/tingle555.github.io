@@ -36,6 +36,7 @@ const SAMPLE_QUOTATION = {
     {
       id: "cat_1",
       name: "系統櫃工程",
+      cost: 77600,
       items: [
         { id: "item_1_1", name: "廚具吊櫃", spec: "W200, 六面結烤", qty: 1, unit: "櫃", price: 32500, note: "" },
         { id: "item_1_2", name: "廚具矮櫃 (G型把手、拉籃)", spec: "W200, 六面結烤", qty: 1, unit: "櫃", price: 32500, note: "" },
@@ -50,6 +51,7 @@ const SAMPLE_QUOTATION = {
     {
       id: "cat_2",
       name: "拆除工程",
+      cost: 7500,
       items: [
         { id: "item_2_1", name: "櫥櫃拆除（8尺內）", spec: "", qty: 1, unit: "式", price: 8000, note: "" },
         { id: "item_2_2", name: "垃圾清運", spec: "", qty: 1, unit: "式", price: 4000, note: "" }
@@ -58,6 +60,7 @@ const SAMPLE_QUOTATION = {
     {
       id: "cat_3",
       name: "水電工程",
+      cost: 13000,
       items: [
         { id: "item_3_1", name: "吸頂燈含安裝 50W", spec: "舞光D-CEN50DM", qty: 1, unit: "件", price: 2800, note: "" },
         { id: "item_3_2", name: "櫥櫃排煙管安裝", spec: "", qty: 1, unit: "式", price: 8000, note: "" },
@@ -68,6 +71,7 @@ const SAMPLE_QUOTATION = {
     {
       id: "cat_4",
       name: "門窗工程",
+      cost: 5500,
       items: [
         { id: "item_4_1", name: "PVC摺疊拉門", spec: "240*200", qty: 1, unit: "式", price: 8000, note: "" }
       ]
@@ -75,6 +79,7 @@ const SAMPLE_QUOTATION = {
     {
       id: "cat_5",
       name: "玻璃工程",
+      cost: 7500,
       items: [
         { id: "item_5_1", name: "廚房烤漆玻璃", spec: "", qty: 25, unit: "才", price: 450, note: "" }
       ]
@@ -82,6 +87,7 @@ const SAMPLE_QUOTATION = {
     {
       id: "cat_6",
       name: "假設工程",
+      cost: 5000,
       items: [
         { id: "item_6_1", name: "公共空間保護", spec: "走道地面、電梯", qty: 1, unit: "式", price: 8000, note: "社區清潔費、保證金另計" }
       ]
@@ -89,6 +95,7 @@ const SAMPLE_QUOTATION = {
     {
       id: "cat_7",
       name: "油漆工程",
+      cost: 28800,
       items: [
         { id: "item_7_1", name: "全室油漆(一底二度)", spec: "虹牌全效乳膠漆", qty: 36, unit: "坪", price: 1200, note: "批土、修補另計" }
       ]
@@ -96,6 +103,7 @@ const SAMPLE_QUOTATION = {
     {
       id: "cat_8",
       name: "地板工程",
+      cost: 37200,
       items: [
         { id: "item_8_1", name: "超耐磨木地板", spec: "Egger標準版", qty: 11, unit: "坪", price: 4600, note: "含損料" },
         { id: "item_8_2", name: "貼工", spec: "", qty: 1, unit: "工", price: 3000, note: "" }
@@ -104,6 +112,7 @@ const SAMPLE_QUOTATION = {
     {
       id: "cat_9",
       name: "清潔工程",
+      cost: 6000,
       items: [
         { id: "item_9_1", name: "全室細清", spec: "", qty: 12, unit: "坪", price: 800, note: "" }
       ]
@@ -405,6 +414,7 @@ function updateFormFromState() {
 // Calculation Engine
 function computeTotals() {
   let engSubtotal = 0;
+  let totalExpense = 0;
   
   currentQuote.categories.forEach(cat => {
     let catSub = 0;
@@ -416,7 +426,13 @@ function computeTotals() {
       catSub += sub;
     });
     cat.subtotal = catSub;
+    
+    const catCost = parseFloat(cat.cost) || 0;
+    cat.cost = catCost;
+    cat.profit = catSub - catCost;
+
     engSubtotal += catSub;
+    totalExpense += catCost;
   });
 
   const designFee = parseFloat(currentQuote.designFee) || 0;
@@ -432,6 +448,9 @@ function computeTotals() {
   const discountAmount = parseFloat(currentQuote.discountAmount) || 0;
   const finalTotal = Math.max(0, grandTotal - discountAmount);
 
+  const totalProfit = finalTotal - totalExpense;
+  const profitMargin = finalTotal > 0 ? (totalProfit / finalTotal) * 100 : 0;
+
   return {
     engSubtotal,
     designFee,
@@ -442,7 +461,10 @@ function computeTotals() {
     grandTotal,
     discountName,
     discountAmount,
-    finalTotal
+    finalTotal,
+    totalExpense,
+    totalProfit,
+    profitMargin
   };
 }
 
@@ -468,11 +490,35 @@ function recalculateCalculations() {
   }
   if (calcFinalTotal) calcFinalTotal.textContent = formatCurrency(totals.finalTotal);
 
-  // Update Category Subtotals in Editor Cards
+  // Update Total Actual Expense & Total Profit in Summary Panel
+  const calcTotalExpense = document.getElementById("calcTotalExpense");
+  const calcTotalProfit = document.getElementById("calcTotalProfit");
+
+  if (calcTotalExpense) calcTotalExpense.textContent = formatCurrency(totals.totalExpense);
+  if (calcTotalProfit) {
+    const profitSign = totals.totalProfit > 0 ? "+" : "";
+    const marginStr = totals.profitMargin.toFixed(1);
+    calcTotalProfit.textContent = `${profitSign}${formatCurrency(totals.totalProfit)} (${marginStr}%)`;
+    if (totals.totalProfit > 0) {
+      calcTotalProfit.className = "value profit-positive";
+    } else if (totals.totalProfit < 0) {
+      calcTotalProfit.className = "value profit-negative";
+    } else {
+      calcTotalProfit.className = "value profit-zero";
+    }
+  }
+
+  // Update Category Subtotals and Profits in Editor Cards
   currentQuote.categories.forEach(cat => {
     const subEl = document.getElementById(`cat_subtotal_${cat.id}`);
     if (subEl) {
       subEl.textContent = formatCurrency(cat.subtotal);
+    }
+    const profEl = document.getElementById(`cat_profit_${cat.id}`);
+    if (profEl) {
+      const profSign = (cat.profit || 0) > 0 ? "+" : "";
+      profEl.textContent = `${profSign}${formatCurrency(cat.profit || 0)}`;
+      profEl.className = (cat.profit || 0) > 0 ? "profit-positive" : ((cat.profit || 0) < 0 ? "profit-negative" : "profit-zero");
     }
   });
 }
@@ -554,6 +600,7 @@ function addCategory() {
   currentQuote.categories.push({
     id: newCatId,
     name: "泥作工程",
+    cost: 0,
     items: [
       { id: "item_" + Date.now(), name: "新工程項目", spec: "", qty: 1, unit: "式", price: 0, note: "" }
     ]
@@ -586,6 +633,16 @@ function updateCategoryName(catId, newName) {
     cat.name = newName;
     renderPreview();
     saveQuoteToLocalStorage();
+  }
+}
+
+function updateCategoryCost(catId, value) {
+  const cat = currentQuote.categories.find(c => c.id === catId);
+  if (cat) {
+    cat.cost = parseFloat(value) || 0;
+    recalculateCalculations();
+    debouncedRenderPreview();
+    debouncedSaveAll();
   }
 }
 
@@ -643,6 +700,7 @@ function updateItemField(catId, itemId, field, value) {
       // Update cell subtotal
       const sub = Math.round((item.qty || 0) * (item.price || 0) * 100) / 100;
       item.subtotal = sub;
+
       const subEl = document.getElementById(`subtotal_${itemId}`);
       if (subEl) subEl.textContent = formatCurrency(sub);
 
@@ -818,7 +876,10 @@ function renderCategories() {
     
     let itemsRowsHtml = "";
     cat.items.forEach((item, itemIdx) => {
-      const itemSub = Math.round((item.qty || 0) * (item.price || 0) * 100) / 100;
+      const qty = parseFloat(item.qty) || 0;
+      const price = parseFloat(item.price) || 0;
+      const itemSub = Math.round(qty * price * 100) / 100;
+      item.subtotal = itemSub;
       
       itemsRowsHtml += `
         <tr class="item-row"
@@ -872,6 +933,9 @@ function renderCategories() {
     ).join('') + `<option value="__CUSTOM__" ${!STANDARD_CATEGORIES.includes(cat.name) ? 'selected' : ''}>✏️ 自訂工種...</option>`;
 
     const isCustom = !STANDARD_CATEGORIES.includes(cat.name);
+    const catProfit = cat.profit !== undefined ? cat.profit : ((cat.subtotal || 0) - (cat.cost || 0));
+    const catProfClass = catProfit > 0 ? 'profit-positive' : (catProfit < 0 ? 'profit-negative' : 'profit-zero');
+    const catProfSign = catProfit > 0 ? '+' : '';
 
     catCard.innerHTML = `
       <div class="category-header">
@@ -900,7 +964,11 @@ function renderCategories() {
         </div>
         <div style="display: flex; align-items: center; gap: 0.75rem;">
           <div class="category-subtotal">
-            分類小計: <span id="cat_subtotal_${cat.id}">${formatCurrency(cat.subtotal || 0)}</span>
+            <span>小計: <strong id="cat_subtotal_${cat.id}">${formatCurrency(cat.subtotal || 0)}</strong></span>
+            <span style="opacity: 0.4; margin: 0 2px;">|</span>
+            <span>成本: <input type="number" class="category-cost-input" value="${cat.cost !== undefined ? cat.cost : 0}" min="0" step="any" placeholder="0" oninput="updateCategoryCost('${cat.id}', this.value)"></span>
+            <span style="opacity: 0.4; margin: 0 2px;">|</span>
+            <span>利潤: <strong id="cat_profit_${cat.id}" class="${catProfClass}">${catProfSign}${formatCurrency(catProfit)}</strong></span>
           </div>
           <button class="btn btn-secondary btn-sm" onclick="addItemToCategory('${cat.id}')">
             <i class="fa-solid fa-plus"></i> 新增細項
@@ -1084,6 +1152,7 @@ function addPresetItemToQuote(preset) {
     qty: 1,
     unit: preset.unit,
     price: preset.price,
+    expense: 0,
     note: ""
   });
 
@@ -1232,7 +1301,7 @@ function createNewQuote() {
         id: "cat_" + Date.now(),
         name: "一般工程",
         items: [
-          { id: "item_" + Date.now(), name: "工程項目", spec: "", qty: 1, unit: "式", price: 0, note: "" }
+          { id: "item_" + Date.now(), name: "工程項目", spec: "", qty: 1, unit: "式", price: 0, expense: 0, note: "" }
         ]
       }
     ]

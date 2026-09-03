@@ -227,6 +227,19 @@
             <span class="label">實收總額 (折後):</span>
             <span class="value" id="calcFinalTotal">$0</span>
           </div>
+          <!-- Internal Cost & Profit Real-time Calculation -->
+          <div class="summary-row internal-profit-row" style="margin-top: 0.75rem; padding-top: 0.75rem; border-top: 1px dashed var(--border-color);">
+            <span class="label" style="color: var(--text-main); font-weight: 600;">
+              <i class="fa-solid fa-receipt" style="color: var(--color-info);"></i> 實際總支出 (成本):
+            </span>
+            <span class="value" id="calcTotalExpense" style="color: var(--text-main); font-weight: 700;">$0</span>
+          </div>
+          <div class="summary-row internal-profit-row">
+            <span class="label" style="color: var(--text-main); font-weight: 600;">
+              <i class="fa-solid fa-chart-line" style="color: var(--color-success);"></i> 預估總利潤 (淨利):
+            </span>
+            <span class="value" id="calcTotalProfit" style="color: var(--color-success); font-weight: 700;">$0 (0.0%)</span>
+          </div>
         </div>
       </div>
 
@@ -352,51 +365,54 @@
             </tbody>
           </table>
 
-          <!-- Bottom Cost Summary Block -->
-          <div class="summary-block">
-            <table class="summary-table">
-              <tr>
-                <td class="sum-label">工程小計</td>
-                <td class="sum-val" id="prevEngSubtotal">$0</td>
-              </tr>
-              <tr>
-                <td class="sum-label">設計費</td>
-                <td class="sum-val" id="prevDesignFee">$0</td>
-              </tr>
-              <tr>
-                <td class="sum-label">工程服務費 (<span id="prevServiceRate">8</span>%)</td>
-                <td class="sum-val" id="prevServiceFee">$0</td>
-              </tr>
-              <tr>
-                <td class="sum-label">未稅金額</td>
-                <td class="sum-val" id="prevUntaxedTotal">$0</td>
-              </tr>
-              <tr>
-                <td class="sum-label">營業稅 (5%)</td>
-                <td class="sum-val" id="prevTaxFee">$0</td>
-              </tr>
-              <tr>
-                <td class="sum-label">報價總額 (含稅)</td>
-                <td class="sum-val" id="prevGrandTotal">$0</td>
-              </tr>
-              <tr id="prevDiscountRow">
-                <td class="sum-label" id="prevDiscountName">專案特惠</td>
-                <td class="sum-val" id="prevDiscountAmount" style="color: #dc2626;">-$0</td>
-              </tr>
-              <tr class="grand-total">
-                <td class="sum-label">實收總額</td>
-                <td class="sum-val" id="prevFinalTotal">$0</td>
-              </tr>
-            </table>
-          </div>
+          <!-- Bottom Section: Terms & Cost Summary side-by-side -->
+          <div class="bottom-flex-block">
+            <!-- Notes & Terms -->
+            <div class="notes-block terms-flex-item">
+              <div class="notes-title">報價條款與說明：</div>
+              <div id="prevTermsText" style="white-space: pre-line; line-height: 1.6;">
+                1. 此報價30日內有效
+                2. 訂金預付30%，期中款50%、尾款20%
+                3. 工程含一年保固
+              </div>
+            </div>
 
-          <!-- Notes & Terms -->
-          <div class="notes-block">
-            <div class="notes-title">報價條款與說明：</div>
-            <div id="prevTermsText" style="white-space: pre-line; line-height: 1.6;">
-              1. 此報價30日內有效
-              2. 訂金預付30%，期中款50%、尾款20%
-              3. 工程含一年保固
+            <!-- Bottom Cost Summary Block -->
+            <div class="summary-block summary-flex-item">
+              <table class="summary-table">
+                <tr>
+                  <td class="sum-label">工程小計</td>
+                  <td class="sum-val" id="prevEngSubtotal">$0</td>
+                </tr>
+                <tr>
+                  <td class="sum-label">設計費</td>
+                  <td class="sum-val" id="prevDesignFee">$0</td>
+                </tr>
+                <tr>
+                  <td class="sum-label">工程服務費 (<span id="prevServiceRate">8</span>%)</td>
+                  <td class="sum-val" id="prevServiceFee">$0</td>
+                </tr>
+                <tr>
+                  <td class="sum-label">未稅金額</td>
+                  <td class="sum-val" id="prevUntaxedTotal">$0</td>
+                </tr>
+                <tr>
+                  <td class="sum-label">營業稅 (5%)</td>
+                  <td class="sum-val" id="prevTaxFee">$0</td>
+                </tr>
+                <tr>
+                  <td class="sum-label">報價總額 (含稅)</td>
+                  <td class="sum-val" id="prevGrandTotal">$0</td>
+                </tr>
+                <tr id="prevDiscountRow">
+                  <td class="sum-label" id="prevDiscountName">專案特惠</td>
+                  <td class="sum-val" id="prevDiscountAmount" style="color: #dc2626;">-$0</td>
+                </tr>
+                <tr class="grand-total">
+                  <td class="sum-label">實收總額</td>
+                  <td class="sum-val" id="prevFinalTotal">$0</td>
+                </tr>
+              </table>
             </div>
           </div>
 
