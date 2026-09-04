@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>臥室改造｜完工驗收確認單</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F7F4EE;
+    --ink:#22201B;
+    --ink-soft:#6B675C;
+    --accent:#2F5D50;
+    --accent-soft:#E4ECE9;
+    --warm:#B8452F;
+    --warm-soft:#F5E4DE;
+    --line:#DCD7C9;
+    --white:#FFFFFF;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Inter',sans-serif;
+    font-size:16px;
+    line-height:1.5;
+    padding-bottom:100px;
+  }
+  .wrap{max-width:640px;margin:0 auto;padding:0 20px;}
+
+  header.top{
+    position:sticky; top:0; z-index:20;
+    background:var(--paper);
+    border-bottom:1px solid var(--line);
+    padding-top:22px;
+  }
+  .eyebrow{
+    font-family:'Archivo',sans-serif;
+    font-weight:700;
+    font-size:13px;
+    color:var(--ink-soft);
+    letter-spacing:0.02em;
+  }
+  h1{
+    font-family:'Archivo',sans-serif;
+    font-weight:800;
+    font-size:26px;
+    margin:4px 0 2px 0;
+    line-height:1.25;
+  }
+  .subtitle{color:var(--ink-soft); font-size:14px; margin-bottom:16px;}
+
+  .progress-row{display:flex; align-items:center; gap:10px; padding-bottom:14px;}
+  .progress-track{flex:1; height:8px; background:var(--line); border-radius:4px; overflow:hidden;}
+  .progress-fill{height:100%; width:0%; background:var(--accent); transition:width .25s ease;}
+  .progress-label{font-size:13px; color:var(--ink-soft); white-space:nowrap; font-variant-numeric:tabular-nums;}
+
+  section{padding:28px 0; border-bottom:1px solid var(--line);}
+  .project-info{padding-top:20px;}
+  .field-row{display:flex; flex-direction:column; gap:6px; margin-bottom:16px;}
+  .field-row label{font-size:13px; color:var(--ink-soft); font-weight:500;}
+  input[type="text"], input[type="date"]{
+    font-family:'Inter',sans-serif;
+    font-size:16px;
+    padding:12px 14px;
+    border:1px solid var(--line);
+    border-radius:8px;
+    background:var(--white);
+    color:var(--ink);
+    width:100%;
+  }
+  input[type="text"]:focus, input[type="date"]:focus{
+    outline:2px solid var(--accent);
+    outline-offset:1px;
+    border-color:var(--accent);
+  }
+
+  .section-head{display:flex; align-items:baseline; gap:12px; margin-bottom:16px;}
+  .section-num{font-family:'Archivo',sans-serif; font-weight:800; font-size:22px; color:var(--accent); min-width:34px;}
+  .section-title{font-family:'Archivo',sans-serif; font-weight:700; font-size:18px;}
+  .section-title .en{display:block; font-family:'Inter',sans-serif; font-weight:500; font-size:12px; color:var(--ink-soft); text-transform:none; margin-bottom:2px;}
+
+  .check-item{
+    display:flex; align-items:flex-start; gap:14px;
+    padding:14px 4px;
+    border-top:1px solid var(--line);
+    cursor:pointer;
+  }
+  .check-item:first-of-type{border-top:none;}
+  .check-item input[type="checkbox"]{
+    appearance:none; -webkit-appearance:none;
+    width:24px; height:24px; min-width:24px;
+    border:2px solid var(--ink-soft);
+    border-radius:6px;
+    margin-top:1px;
+    position:relative;
+    cursor:pointer;
+    background:var(--white);
+    flex-shrink:0;
+  }
+  .check-item input[type="checkbox"]:checked{
+    background:var(--accent);
+    border-color:var(--accent);
+  }
+  .check-item input[type="checkbox"]:checked::after{
+    content:"";
+    position:absolute;
+    left:6px; top:2px;
+    width:7px; height:12px;
+    border:solid white;
+    border-width:0 2px 2px 0;
+    transform:rotate(45deg);
+  }
+  .check-item span{font-size:15px; padding-top:2px;}
+  .check-item.checked span{color:var(--ink-soft); text-decoration:line-through; text-decoration-color:var(--line);}
+
+  .punch-line{display:flex; align-items:center; gap:10px; margin-bottom:10px;}
+  .punch-num{font-family:'Archivo',sans-serif; font-weight:700; color:var(--warm); font-size:14px; min-width:20px;}
+
+  .sig-block{margin-bottom:26px;}
+  .sig-label{font-size:13px; color:var(--ink-soft); font-weight:500; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center;}
+  .sig-clear{font-size:12px; color:var(--warm); background:none; border:none; cursor:pointer; font-family:'Inter',sans-serif; text-decoration:underline; padding:0;}
+  canvas.sigpad{
+    width:100%; height:140px;
+    background:var(--white);
+    border:1px solid var(--line);
+    border-radius:8px;
+    touch-action:none;
+    display:block;
+  }
+  .sig-hint{font-size:12px; color:var(--ink-soft); margin-top:6px;}
+
+  .bar{
+    position:fixed; bottom:0; left:0; right:0;
+    background:var(--white);
+    border-top:1px solid var(--line);
+    padding:12px 20px calc(12px + env(safe-area-inset-bottom));
+    display:flex; gap:10px; z-index:30;
+  }
+  .bar button{
+    flex:1;
+    font-family:'Archivo',sans-serif;
+    font-weight:700;
+    font-size:14px;
+    padding:14px 10px;
+    border-radius:8px;
+    border:none;
+    cursor:pointer;
+  }
+  .btn-primary{background:var(--accent); color:white;}
+  .btn-secondary{background:var(--white); color:var(--ink); border:1px solid var(--line) !important;}
+
+  .save-note{font-size:12px; color:var(--ink-soft); text-align:center; padding-top:10px;}
+
+  footer.doc-footer{padding:24px 0 40px 0; text-align:center; font-size:12px; color:var(--ink-soft);}
+
+  @media print{
+    body{padding-bottom:0;}
+    .bar, header.top .progress-row, .save-note{display:none !important;}
+    header.top{position:static; border-bottom:none;}
+    section{break-inside:avoid; padding:16px 0;}
+    .check-item input[type="checkbox"]{-webkit-print-color-adjust:exact; print-color-adjust:exact;}
+  }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <div class="eyebrow">JAMMY · BEDROOM RENOVATION</div>
+    <h1>臥室改造完工驗收確認單</h1>
+    <div class="subtitle">Completion &amp; Electronic Acceptance · 手機填寫版</div>
+    <div class="progress-row">
+      <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+      <div class="progress-label" id="progressLabel">0 / 40</div>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <section class="project-info">
+    <div class="field-row">
+      <label for="customerName">客戶姓名</label>
+      <input type="text" id="customerName" placeholder="請輸入客戶姓名" autocomplete="name">
+    </div>
+    <div class="field-row">
+      <label for="checkDate">驗收日期</label>
+      <input type="date" id="checkDate">
+    </div>
+  </section>
+
+  <!-- Sections are generated with data below -->
+  <div id="sectionsContainer"></div>
+
+  <section id="punchSection">
+    <div class="section-head">
+      <div class="section-num">08</div>
+      <div class="section-title"><span class="en">PUNCH LIST</span>待改善事項</div>
+    </div>
+    <div class="punch-line"><div class="punch-num">01</div><input type="text" class="punch-input" data-punch="0" placeholder="（如無則留空）"></div>
+    <div class="punch-line"><div class="punch-num">02</div><input type="text" class="punch-input" data-punch="1" placeholder="（如無則留空）"></div>
+    <div class="punch-line"><div class="punch-num">03</div><input type="text" class="punch-input" data-punch="2" placeholder="（如無則留空）"></div>
+    <div style="margin-top:14px;">
+      <div class="check-item" data-check-id="punch-0">
+        <input type="checkbox" id="punch-0">
+        <span>上述待改善事項皆已完成</span>
+      </div>
+      <div class="check-item" data-check-id="punch-1">
+        <input type="checkbox" id="punch-1">
+        <span>無其他待改善事項</span>
+      </div>
+    </div>
+  </section>
+
+  <section id="finalSection">
+    <div class="section-head">
+      <div class="section-num">09</div>
+      <div class="section-title"><span class="en">FINAL ACCEPTANCE</span>完工驗收</div>
+    </div>
+
+    <div class="sig-block">
+      <div class="sig-label"><span>客戶簽名</span><button class="sig-clear" data-clear="customer">清除</button></div>
+      <canvas class="sigpad" id="sig-customer"></canvas>
+      <div class="sig-hint">請用手指或觸控筆於上方簽名</div>
+    </div>
+
+    <div class="sig-block">
+      <div class="sig-label"><span>專案執行簽名</span><button class="sig-clear" data-clear="exec">清除</button></div>
+      <canvas class="sigpad" id="sig-exec"></canvas>
+      <div class="sig-hint">請用手指或觸控筆於上方簽名</div>
+    </div>
+
+    <div class="field-row">
+      <label for="finalDate">驗收日期</label>
+      <input type="date" id="finalDate">
+    </div>
+  </section>
+
+  <footer class="doc-footer">BEDROOM RENOVATION · PROJECT COMPLETION &amp; ACCEPTANCE</footer>
+</div>
+
+<div class="bar">
+  <button class="btn-secondary" id="resetBtn">清除全部</button>
+  <button class="btn-primary" id="printBtn">列印／存成 PDF</button>
+</div>
+<div class="save-note wrap" id="saveNote" style="display:none;">已自動儲存</div>
+
+<script>
+const SECTIONS = [
+  { num:"01", en:"BED AREA", zh:"床鋪區", items:[
+    "標準雙人床架安裝完成","床架穩固、無明顯晃動","床鋪位置與確認配置一致","舊床架／床墊完成回收處理"
+  ]},
+  { num:"02", en:"HEADBOARD", zh:"床頭繃布", items:[
+    "床頭繃布／超耐刮皮革施工完成","材質及色系與確認樣式相符","四周及接縫收邊完整","整體外觀確認無誤"
+  ]},
+  { num:"03", en:"WINDOW BLINDS", zh:"調光簾", items:[
+    "主臥調光簾安裝完成","次臥調光簾安裝完成","尺寸及安裝位置正確","開啟、關閉及調光功能正常"
+  ]},
+  { num:"04", en:"WORK DESK", zh:"雙人工作桌", items:[
+    "工作桌安裝及定位完成","桌面穩固、水平正常","抽屜／收納櫃配置完成","抽屜開關正常","桌面、櫃體無明顯刮傷或損傷"
+  ]},
+  { num:"05", en:"DRESSING AREA", zh:"化妝台區", items:[
+    "化妝台／斗櫃定位完成","鏡子安裝／擺放完成","椅凳配置完成","抽屜及櫃體功能正常","家具無明顯碰傷或刮傷","不影響房間及浴室進出動線","整體配置確認無誤"
+  ]},
+  { num:"06", en:"BATHROOM CABINET", zh:"浴室浴櫃", items:[
+    "浴櫃安裝完成","櫃體固定穩固","櫃門開關正常","面盆及排水使用正常","無明顯漏水情形","插座／開關可正常使用","排水孔及管線未受櫃體阻擋","木作表面及收邊完整","整體外觀確認無誤"
+  ]},
+  { num:"07", en:"FINAL CHECK", zh:"全室完工確認", items:[
+    "家具及設備皆依確認位置完成定位","房門、浴室門及櫃門皆可正常使用","房間主要走道及使用動線正常","牆面及地板無施工造成之明顯損傷","整體改造成果確認完成"
+  ]}
+];
+
+const container = document.getElementById('sectionsContainer');
+let checkboxCount = 0;
+
+SECTIONS.forEach((sec, sIdx) => {
+  const section = document.createElement('section');
+  const head = document.createElement('div');
+  head.className = 'section-head';
+  head.innerHTML = `<div class="section-num">${sec.num}</div>
+    <div class="section-title"><span class="en">${sec.en}</span>${sec.zh}</div>`;
+  section.appendChild(head);
+
+  sec.items.forEach((label, iIdx) => {
+    const id = `s${sIdx}-i${iIdx}`;
+    const row = document.createElement('div');
+    row.className = 'check-item';
+    row.dataset.checkId = id;
+    row.innerHTML = `<input type="checkbox" id="${id}"><span>${label}</span>`;
+    section.appendChild(row);
+    checkboxCount++;
+  });
+
+  container.appendChild(section);
+});
+
+document.getElementById('progressLabel').textContent = `0 / ${checkboxCount + 2}`;
+
+// toggle checkbox on row click, keep label struck-through state
+document.body.addEventListener('click', (e) => {
+  const row = e.target.closest('.check-item');
+  if (!row) return;
+  const cb = row.querySelector('input[type="checkbox"]');
+  if (e.target !== cb) cb.checked = !cb.checked;
+  row.classList.toggle('checked', cb.checked);
+  updateProgress();
+  scheduleSave();
+});
+
+function updateProgress(){
+  const all = document.querySelectorAll('.check-item input[type="checkbox"]');
+  const total = all.length;
+  const checked = document.querySelectorAll('.check-item input[type="checkbox"]:checked').length;
+  document.getElementById('progressFill').style.width = total ? `${(checked/total)*100}%` : '0%';
+  document.getElementById('progressLabel').textContent = `${checked} / ${total}`;
+}
+
+// ---- Signature pads ----
+function setupSigPad(canvas){
+  const ctx = canvas.getContext('2d');
+  function resize(){
+    const rect = canvas.getBoundingClientRect();
+    const ratio = window.devicePixelRatio || 1;
+    const prevData = canvas.toDataURL ? canvas._imgData : null;
+    canvas.width = rect.width * ratio;
+    canvas.height = rect.height * ratio;
+    ctx.scale(ratio, ratio);
+    ctx.lineWidth = 2.4;
+    ctx.lineCap = 'round';
+    ctx.strokeStyle = '#22201B';
+  }
+  resize();
+  let drawing = false, last = null;
+
+  function pos(e){
+    const rect = canvas.getBoundingClientRect();
+    const t = e.touches ? e.touches[0] : e;
+    return { x: t.clientX - rect.left, y: t.clientY - rect.top };
+  }
+  function start(e){ drawing = true; last = pos(e); e.preventDefault(); }
+  function move(e){
+    if(!drawing) return;
+    const p = pos(e);
+    ctx.beginPath(); ctx.moveTo(last.x, last.y); ctx.lineTo(p.x, p.y); ctx.stroke();
+    last = p;
+    e.preventDefault();
+    canvas.dataset.hasInk = "1";
+    scheduleSave();
+  }
+  function end(){ drawing = false; }
+
+  canvas.addEventListener('mousedown', start);
+  canvas.addEventListener('mousemove', move);
+  window.addEventListener('mouseup', end);
+  canvas.addEventListener('touchstart', start, {passive:false});
+  canvas.addEventListener('touchmove', move, {passive:false});
+  canvas.addEventListener('touchend', end);
+
+  canvas._clear = () => { ctx.clearRect(0,0,canvas.width,canvas.height); canvas.dataset.hasInk = ""; scheduleSave(); };
+  canvas._ctx = ctx;
+  return canvas;
+}
+
+const sigCustomer = setupSigPad(document.getElementById('sig-customer'));
+const sigExec = setupSigPad(document.getElementById('sig-exec'));
+
+document.querySelectorAll('.sig-clear').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const which = btn.dataset.clear;
+    (which === 'customer' ? sigCustomer : sigExec)._clear();
+  });
+});
+
+// ---- Reset ----
+document.getElementById('resetBtn').addEventListener('click', () => {
+  if(!confirm('確定要清除全部已填寫的內容嗎？此動作無法復原。')) return;
+  document.querySelectorAll('input[type="checkbox"]').forEach(cb => { cb.checked = false; cb.closest('.check-item')?.classList.remove('checked'); });
+  document.querySelectorAll('input[type="text"], input[type="date"]').forEach(inp => inp.value = '');
+  sigCustomer._clear();
+  sigExec._clear();
+  updateProgress();
+  scheduleSave(true);
+});
+
+// ---- Print ----
+document.getElementById('printBtn').addEventListener('click', () => window.print());
+
+// ---- Autosave (personal, this device/account only) ----
+let saveTimer = null;
+function scheduleSave(immediate){
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(doSave, immediate ? 0 : 600);
+}
+async function doSave(){
+  try{
+    const data = {
+      customerName: document.getElementById('customerName').value,
+      checkDate: document.getElementById('checkDate').value,
+      finalDate: document.getElementById('finalDate').value,
+      checks: {},
+      punch: Array.from(document.querySelectorAll('.punch-input')).map(i => i.value),
+      sigCustomer: document.getElementById('sig-customer').dataset.hasInk ? document.getElementById('sig-customer').toDataURL() : "",
+      sigExec: document.getElementById('sig-exec').dataset.hasInk ? document.getElementById('sig-exec').toDataURL() : ""
+    };
+    document.querySelectorAll('.check-item input[type="checkbox"]').forEach(cb => { data.checks[cb.id] = cb.checked; });
+    if(window.storage){
+      await window.storage.set('jammy-bedroom-acceptance', JSON.stringify(data), false);
+      showSaveNote();
+    }
+  }catch(err){ console.error('save failed', err); }
+}
+let noteTimer = null;
+function showSaveNote(){
+  const note = document.getElementById('saveNote');
+  note.style.display = 'block';
+  clearTimeout(noteTimer);
+  noteTimer = setTimeout(() => { note.style.display = 'none'; }, 1500);
+}
+
+async function loadSaved(){
+  try{
+    if(!window.storage) return;
+    const res = await window.storage.get('jammy-bedroom-acceptance', false);
+    if(!res || !res.value) return;
+    const data = JSON.parse(res.value);
+    document.getElementById('customerName').value = data.customerName || '';
+    document.getElementById('checkDate').value = data.checkDate || '';
+    document.getElementById('finalDate').value = data.finalDate || '';
+    document.querySelectorAll('.punch-input').forEach((inp, idx) => inp.value = (data.punch && data.punch[idx]) || '');
+    if(data.checks){
+      Object.keys(data.checks).forEach(id => {
+        const cb = document.getElementById(id);
+        if(cb){ cb.checked = data.checks[id]; cb.closest('.check-item')?.classList.toggle('checked', cb.checked); }
+      });
+    }
+    [['sig-customer', data.sigCustomer], ['sig-exec', data.sigExec]].forEach(([id, dataUrl]) => {
+      if(!dataUrl) return;
+      const canvas = document.getElementById(id);
+      const img = new Image();
+      img.onload = () => { canvas._ctx.drawImage(img, 0, 0, canvas.width, canvas.height); canvas.dataset.hasInk = "1"; };
+      img.src = dataUrl;
+    });
+    updateProgress();
+  }catch(err){
+    // no saved data yet, ignore
+  }
+}
+
+// text inputs trigger autosave too
+document.body.addEventListener('input', (e) => {
+  if(e.target.matches('input[type="text"], input[type="date"]')) scheduleSave();
+});
+
+updateProgress();
+loadSaved();
+</script>
+
+</body>
+</html>
