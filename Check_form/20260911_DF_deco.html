@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>丹佛花都｜工程驗收單</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F7F4EE;
+    --ink:#22201B;
+    --ink-soft:#6B675C;
+    --accent:#2F5D50;
+    --accent-soft:#E4ECE9;
+    --warm:#B8452F;
+    --warm-soft:#F5E4DE;
+    --line:#DCD7C9;
+    --white:#FFFFFF;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Inter',sans-serif;
+    font-size:16px;
+    line-height:1.5;
+    padding-bottom:100px;
+  }
+  .wrap{max-width:640px;margin:0 auto;padding:0 20px;}
+
+  header.top{
+    position:sticky; top:0; z-index:20;
+    background:var(--paper);
+    border-bottom:1px solid var(--line);
+    padding-top:22px;
+  }
+  .eyebrow{font-family:'Archivo',sans-serif; font-weight:700; font-size:13px; color:var(--ink-soft); letter-spacing:0.02em;}
+  h1{font-family:'Archivo',sans-serif; font-weight:800; font-size:24px; margin:4px 0 2px 0; line-height:1.3;}
+  .subtitle{color:var(--ink-soft); font-size:14px; margin-bottom:16px;}
+
+  .progress-row{display:flex; align-items:center; gap:10px; padding-bottom:14px;}
+  .progress-track{flex:1; height:8px; background:var(--line); border-radius:4px; overflow:hidden;}
+  .progress-fill{height:100%; width:0%; background:var(--accent); transition:width .25s ease;}
+  .progress-label{font-size:13px; color:var(--ink-soft); white-space:nowrap; font-variant-numeric:tabular-nums;}
+
+  section{padding:28px 0; border-bottom:1px solid var(--line);}
+
+  .field-row{display:flex; flex-direction:column; gap:6px; margin-bottom:16px;}
+  .field-row label{font-size:13px; color:var(--ink-soft); font-weight:500;}
+  .field-pair{display:flex; gap:10px;}
+  .field-pair .field-row{flex:1;}
+  input[type="text"], input[type="date"], input[type="time"], input[type="tel"]{
+    font-family:'Inter',sans-serif;
+    font-size:16px;
+    padding:12px 14px;
+    border:1px solid var(--line);
+    border-radius:8px;
+    background:var(--white);
+    color:var(--ink);
+    width:100%;
+  }
+  input:focus{outline:2px solid var(--accent); outline-offset:1px; border-color:var(--accent);}
+
+  .section-head{display:flex; align-items:baseline; gap:12px; margin-bottom:16px;}
+  .section-num{font-family:'Archivo',sans-serif; font-weight:800; font-size:22px; color:var(--accent); min-width:34px;}
+  .section-title{font-family:'Archivo',sans-serif; font-weight:700; font-size:18px;}
+  .section-title .en{display:block; font-family:'Inter',sans-serif; font-weight:500; font-size:12px; color:var(--ink-soft); margin-bottom:2px;}
+
+  .item-card{padding:18px 0; border-top:1px solid var(--line);}
+  .item-card:first-of-type{border-top:none; padding-top:4px;}
+  .item-tag{font-family:'Archivo',sans-serif; font-weight:700; font-size:12px; color:var(--ink-soft); margin-bottom:6px;}
+  .item-desc{font-size:15px; margin-bottom:12px;}
+
+  .pill-group{display:flex; gap:8px; margin-bottom:10px;}
+  .pill{
+    flex:1; text-align:center;
+    padding:10px 6px;
+    border:1.5px solid var(--line);
+    border-radius:20px;
+    font-size:14px; font-weight:600;
+    color:var(--ink-soft);
+    cursor:pointer;
+    user-select:none;
+  }
+  .pill.pass.active{background:var(--accent); border-color:var(--accent); color:white;}
+  .pill.fix.active{background:var(--warm); border-color:var(--warm); color:white;}
+  .pill.na.active{background:var(--ink-soft); border-color:var(--ink-soft); color:white;}
+
+  input.note-input{font-size:14px; padding:9px 12px;}
+
+  .conclusion-pill{padding:14px 12px; border:1.5px solid var(--line); border-radius:10px; margin-bottom:10px; cursor:pointer; display:flex; align-items:center; gap:10px;}
+  .conclusion-pill .dot{width:18px; height:18px; border-radius:50%; border:2px solid var(--ink-soft); flex-shrink:0; position:relative;}
+  .conclusion-pill.active{border-color:var(--accent); background:var(--accent-soft);}
+  .conclusion-pill.active .dot{border-color:var(--accent);}
+  .conclusion-pill.active .dot::after{content:""; position:absolute; inset:3px; border-radius:50%; background:var(--accent);}
+  .conclusion-other-input{margin-top:8px; display:none;}
+  .conclusion-other-input.show{display:block;}
+
+  .fix-record{border:1px solid var(--line); border-radius:10px; padding:16px; margin-bottom:14px; background:var(--white);}
+  .fix-record .rec-title{font-family:'Archivo',sans-serif; font-weight:700; font-size:13px; color:var(--warm); margin-bottom:12px;}
+  .recheck-toggle{display:flex; gap:8px; margin-top:4px;}
+  .recheck-pill{flex:1; text-align:center; padding:9px 6px; border:1.5px solid var(--line); border-radius:8px; font-size:13px; font-weight:600; color:var(--ink-soft); cursor:pointer;}
+  .recheck-pill.pass.active{background:var(--accent); border-color:var(--accent); color:white;}
+  .recheck-pill.pending.active{background:var(--warm); border-color:var(--warm); color:white;}
+
+  .sig-block{margin-bottom:26px;}
+  .sig-label{font-size:13px; color:var(--ink-soft); font-weight:500; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center;}
+  .sig-clear{font-size:12px; color:var(--warm); background:none; border:none; cursor:pointer; font-family:'Inter',sans-serif; text-decoration:underline; padding:0;}
+  canvas.sigpad{width:100%; height:140px; background:var(--white); border:1px solid var(--line); border-radius:8px; touch-action:none; display:block;}
+  .sig-hint{font-size:12px; color:var(--ink-soft); margin-top:6px;}
+
+  .bar{position:fixed; bottom:0; left:0; right:0; background:var(--white); border-top:1px solid var(--line); padding:12px 20px calc(12px + env(safe-area-inset-bottom)); display:flex; gap:10px; z-index:30;}
+  .bar button{flex:1; font-family:'Archivo',sans-serif; font-weight:700; font-size:14px; padding:14px 10px; border-radius:8px; border:none; cursor:pointer;}
+  .btn-primary{background:var(--accent); color:white;}
+  .btn-secondary{background:var(--white); color:var(--ink); border:1px solid var(--line) !important;}
+
+  .save-note{font-size:12px; color:var(--ink-soft); text-align:center; padding-top:10px;}
+  footer.doc-footer{padding:24px 0 40px 0; text-align:center; font-size:12px; color:var(--ink-soft);}
+
+  @media print{
+    body{padding-bottom:0;}
+    .bar, header.top .progress-row, .save-note{display:none !important;}
+    header.top{position:static; border-bottom:none;}
+    section{break-inside:avoid; padding:16px 0;}
+  }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <div class="eyebrow">丹佛花都室內工程</div>
+    <h1>工程驗收單</h1>
+    <div class="subtitle">Construction Acceptance · 手機填寫版</div>
+    <div class="progress-row">
+      <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+      <div class="progress-label" id="progressLabel">0 / 11</div>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <section class="project-info">
+    <div class="field-row">
+      <label for="projectName">工程名稱</label>
+      <input type="text" id="projectName" value="丹佛花都室內工程">
+    </div>
+    <div class="field-row">
+      <label for="checkDate">驗收日期</label>
+      <input type="date" id="checkDate">
+    </div>
+    <div class="field-row">
+      <label for="siteAddress">施工地址</label>
+      <input type="text" id="siteAddress" value="桃園市龜山區">
+    </div>
+    <div class="field-pair">
+      <div class="field-row">
+        <label for="timeStart">驗收時間（起）</label>
+        <input type="time" id="timeStart">
+      </div>
+      <div class="field-row">
+        <label for="timeEnd">驗收時間（迄）</label>
+        <input type="time" id="timeEnd">
+      </div>
+    </div>
+    <div class="field-row">
+      <label for="ownerName">業主姓名</label>
+      <input type="text" id="ownerName" placeholder="請輸入業主姓名">
+    </div>
+    <div class="field-row">
+      <label for="ownerPhone">聯絡電話</label>
+      <input type="tel" id="ownerPhone" placeholder="請輸入聯絡電話">
+    </div>
+    <div class="field-row">
+      <label for="contractor">施工單位</label>
+      <input type="text" id="contractor" value="樺曏創意設計">
+    </div>
+    <div class="field-row">
+      <label for="siteRep">現場代表</label>
+      <input type="text" id="siteRep" placeholder="請輸入現場代表姓名">
+    </div>
+  </section>
+
+  <div id="itemsContainer"></div>
+
+  <section id="fixSection">
+    <div class="section-head">
+      <div class="section-num">05</div>
+      <div class="section-title"><span class="en">FOLLOW-UP</span>缺失及改善紀錄</div>
+    </div>
+    <div id="fixRecords"></div>
+  </section>
+
+  <section id="conclusionSection">
+    <div class="section-head">
+      <div class="section-num">06</div>
+      <div class="section-title"><span class="en">CONCLUSION</span>驗收結論</div>
+    </div>
+    <div class="conclusion-pill" data-conclusion="all"><div class="dot"></div><span>全部驗收合格</span></div>
+    <div class="conclusion-pill" data-conclusion="retest"><div class="dot"></div><span>限期改善後複驗</span></div>
+    <div class="conclusion-pill" data-conclusion="other"><div class="dot"></div><span>其他</span></div>
+    <input type="text" id="conclusionOther" class="conclusion-other-input" placeholder="請說明其他驗收結論">
+    <p style="font-size:12px; color:var(--ink-soft); margin-top:14px; line-height:1.7;">
+      本單所列待改善事項應依雙方約定完成；完成複驗前，不視為該項目驗收合格。簽署本單不影響依法或依約主張未能於一般驗收時發現之瑕疵及保固權利。
+    </p>
+  </section>
+
+  <section id="signSection">
+    <div class="section-head">
+      <div class="section-num">07</div>
+      <div class="section-title"><span class="en">SIGNATURES</span>簽署確認</div>
+    </div>
+
+    <div class="sig-block">
+      <div class="sig-label"><span>業主或驗收代表簽名</span><button class="sig-clear" data-clear="owner">清除</button></div>
+      <canvas class="sigpad" id="sig-owner"></canvas>
+      <div class="sig-hint">請用手指或觸控筆於上方簽名</div>
+    </div>
+    <div class="field-row">
+      <label for="ownerSignDate">簽署日期</label>
+      <input type="date" id="ownerSignDate">
+    </div>
+
+    <div class="sig-block" style="margin-top:10px;">
+      <div class="sig-label"><span>施工單位代表簽名</span><button class="sig-clear" data-clear="contractor">清除</button></div>
+      <canvas class="sigpad" id="sig-contractor"></canvas>
+      <div class="sig-hint">請用手指或觸控筆於上方簽名</div>
+    </div>
+    <div class="field-row">
+      <label for="contractorSignDate">簽署日期</label>
+      <input type="date" id="contractorSignDate">
+    </div>
+  </section>
+
+  <footer class="doc-footer">丹佛花都工程驗收單 · CONSTRUCTION ACCEPTANCE</footer>
+</div>
+
+<div class="bar">
+  <button class="btn-secondary" id="resetBtn">清除全部</button>
+  <button class="btn-primary" id="printBtn">列印／存成 PDF</button>
+</div>
+<div class="save-note wrap" id="saveNote" style="display:none;">已自動儲存</div>
+
+<script>
+const GROUPS = [
+  { num:"01", en:"CEILING", zh:"天花板", items:[
+    "表面平整，接縫收邊完整，無明顯裂縫、翹曲或破損",
+    "板材固定牢靠；管線包覆、轉角、牆邊、冷氣與燈具孔位收口完整"
+  ]},
+  { num:"02", en:"LIGHTING", zh:"燈具", items:[
+    "燈具款式、數量、位置及安裝方向與雙方確認內容相符",
+    "燈具固定牢靠，面框貼合，電線及接線處無外露",
+    "逐盞及開關測試正常，無明顯閃爍、異音、異常發熱或色溫差異"
+  ]},
+  { num:"03", en:"PAINTING", zh:"油漆", items:[
+    "顏色、光澤及施作範圍與雙方確認內容相符",
+    "牆面及天花表面色澤均勻，無明顯透底、刷痕、流掛或色差"
+  ]},
+  { num:"04", en:"CLEANING", zh:"完工清潔", items:[
+    "工程廢料、包材、保護膜及施工垃圾已清運完成",
+    "地面、牆面、櫃體外觀、燈具及開關面板無明顯粉塵或污漬",
+    "油漆點、殘膠與施工殘留物已清除；現場無尖銳物或安全疑慮"
+  ]}
+];
+
+const itemsContainer = document.getElementById('itemsContainer');
+let itemGlobalIndex = 0;
+
+GROUPS.forEach(group => {
+  const section = document.createElement('section');
+  const head = document.createElement('div');
+  head.className = 'section-head';
+  head.innerHTML = `<div class="section-num">${group.num}</div>
+    <div class="section-title"><span class="en">${group.en}</span>${group.zh}</div>`;
+  section.appendChild(head);
+
+  group.items.forEach(desc => {
+    itemGlobalIndex++;
+    const id = `item-${itemGlobalIndex}`;
+    const card = document.createElement('div');
+    card.className = 'item-card';
+    card.innerHTML = `
+      <div class="item-tag">項目 ${itemGlobalIndex}</div>
+      <div class="item-desc">${desc}</div>
+      <div class="pill-group" data-result-group="${id}">
+        <div class="pill pass" data-value="pass">合格</div>
+        <div class="pill fix" data-value="fix">改善</div>
+        <div class="pill na" data-value="na">N/A</div>
+      </div>
+      <input type="text" class="note-input" placeholder="備註（選填）" data-note="${id}">
+    `;
+    section.appendChild(card);
+  });
+
+  itemsContainer.appendChild(section);
+});
+
+const TOTAL_ITEMS = itemGlobalIndex;
+document.getElementById('progressLabel').textContent = `0 / ${TOTAL_ITEMS + 1}`;
+
+// pill selection (result groups)
+document.body.addEventListener('click', (e) => {
+  const pill = e.target.closest('.pill');
+  if(pill){
+    const group = pill.closest('.pill-group');
+    group.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
+    pill.classList.add('active');
+    group.dataset.selected = pill.dataset.value;
+    updateProgress();
+    scheduleSave();
+    return;
+  }
+  const recheck = e.target.closest('.recheck-pill');
+  if(recheck){
+    const group = recheck.closest('.recheck-toggle');
+    group.querySelectorAll('.recheck-pill').forEach(p => p.classList.remove('active'));
+    recheck.classList.add('active');
+    group.dataset.selected = recheck.dataset.value;
+    scheduleSave();
+    return;
+  }
+  const conc = e.target.closest('.conclusion-pill');
+  if(conc){
+    document.querySelectorAll('.conclusion-pill').forEach(p => p.classList.remove('active'));
+    conc.classList.add('active');
+    const otherInput = document.getElementById('conclusionOther');
+    otherInput.classList.toggle('show', conc.dataset.conclusion === 'other');
+    updateProgress();
+    scheduleSave();
+  }
+});
+
+function updateProgress(){
+  const resultGroups = document.querySelectorAll('[data-result-group]');
+  let checked = 0;
+  resultGroups.forEach(g => { if(g.dataset.selected) checked++; });
+  const conclusionSelected = document.querySelector('.conclusion-pill.active') ? 1 : 0;
+  const total = TOTAL_ITEMS + 1;
+  const done = checked + conclusionSelected;
+  document.getElementById('progressFill').style.width = `${(done/total)*100}%`;
+  document.getElementById('progressLabel').textContent = `${done} / ${total}`;
+}
+
+// ---- Follow-up / fix records (3 rows) ----
+const fixContainer = document.getElementById('fixRecords');
+for(let i=1;i<=3;i++){
+  const rec = document.createElement('div');
+  rec.className = 'fix-record';
+  rec.innerHTML = `
+    <div class="rec-title">項次 ${i}</div>
+    <div class="field-row">
+      <label>缺失或改善內容</label>
+      <input type="text" class="fix-desc" data-fix="${i}" placeholder="（如無則留空）">
+    </div>
+    <div class="field-row">
+      <label>改善期限</label>
+      <input type="date" class="fix-deadline" data-fix-deadline="${i}">
+    </div>
+    <div class="field-row" style="margin-bottom:8px;">
+      <label>複驗結果</label>
+      <div class="recheck-toggle" data-recheck-group="${i}">
+        <div class="recheck-pill pass" data-value="pass">合格</div>
+        <div class="recheck-pill pending" data-value="pending">待改善</div>
+      </div>
+    </div>
+    <div class="field-row">
+      <label>複驗日期</label>
+      <input type="date" class="fix-recheck-date" data-fix-recheck-date="${i}">
+    </div>
+  `;
+  fixContainer.appendChild(rec);
+}
+
+// ---- Signature pads ----
+function setupSigPad(canvas){
+  const ctx = canvas.getContext('2d');
+  function resize(){
+    const rect = canvas.getBoundingClientRect();
+    const ratio = window.devicePixelRatio || 1;
+    canvas.width = rect.width * ratio;
+    canvas.height = rect.height * ratio;
+    ctx.scale(ratio, ratio);
+    ctx.lineWidth = 2.4;
+    ctx.lineCap = 'round';
+    ctx.strokeStyle = '#22201B';
+  }
+  resize();
+  let drawing = false, last = null;
+  function pos(e){
+    const rect = canvas.getBoundingClientRect();
+    const t = e.touches ? e.touches[0] : e;
+    return { x: t.clientX - rect.left, y: t.clientY - rect.top };
+  }
+  function start(e){ drawing = true; last = pos(e); e.preventDefault(); }
+  function move(e){
+    if(!drawing) return;
+    const p = pos(e);
+    ctx.beginPath(); ctx.moveTo(last.x, last.y); ctx.lineTo(p.x, p.y); ctx.stroke();
+    last = p;
+    e.preventDefault();
+    canvas.dataset.hasInk = "1";
+    scheduleSave();
+  }
+  function end(){ drawing = false; }
+  canvas.addEventListener('mousedown', start);
+  canvas.addEventListener('mousemove', move);
+  window.addEventListener('mouseup', end);
+  canvas.addEventListener('touchstart', start, {passive:false});
+  canvas.addEventListener('touchmove', move, {passive:false});
+  canvas.addEventListener('touchend', end);
+  canvas._clear = () => { ctx.clearRect(0,0,canvas.width,canvas.height); canvas.dataset.hasInk = ""; scheduleSave(); };
+  canvas._ctx = ctx;
+  return canvas;
+}
+const sigOwner = setupSigPad(document.getElementById('sig-owner'));
+const sigContractor = setupSigPad(document.getElementById('sig-contractor'));
+document.querySelectorAll('.sig-clear').forEach(btn => {
+  btn.addEventListener('click', () => {
+    (btn.dataset.clear === 'owner' ? sigOwner : sigContractor)._clear();
+  });
+});
+
+// ---- Reset ----
+document.getElementById('resetBtn').addEventListener('click', () => {
+  if(!confirm('確定要清除全部已填寫的內容嗎？此動作無法復原。')) return;
+  document.querySelectorAll('.pill.active, .recheck-pill.active, .conclusion-pill.active').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('[data-result-group]').forEach(g => delete g.dataset.selected);
+  document.querySelectorAll('[data-recheck-group]').forEach(g => delete g.dataset.selected);
+  document.getElementById('conclusionOther').classList.remove('show');
+  document.querySelectorAll('input[type="text"], input[type="date"], input[type="time"], input[type="tel"]').forEach(inp => {
+    if(inp.id === 'projectName') inp.value = '丹佛花都室內工程';
+    else if(inp.id === 'siteAddress') inp.value = '桃園市龜山區';
+    else if(inp.id === 'contractor') inp.value = '樺曏創意設計';
+    else inp.value = '';
+  });
+  sigOwner._clear();
+  sigContractor._clear();
+  updateProgress();
+  scheduleSave(true);
+});
+
+// ---- Print ----
+document.getElementById('printBtn').addEventListener('click', () => window.print());
+
+// ---- Autosave ----
+let saveTimer = null;
+function scheduleSave(immediate){
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(doSave, immediate ? 0 : 600);
+}
+async function doSave(){
+  try{
+    const data = {
+      fields: {},
+      results: {},
+      notes: {},
+      fix: {},
+      conclusion: null,
+      conclusionOther: document.getElementById('conclusionOther').value,
+      sigOwner: document.getElementById('sig-owner').dataset.hasInk ? document.getElementById('sig-owner').toDataURL() : "",
+      sigContractor: document.getElementById('sig-contractor').dataset.hasInk ? document.getElementById('sig-contractor').toDataURL() : ""
+    };
+    document.querySelectorAll('.project-info input, #signSection input[type="date"]').forEach(inp => { data.fields[inp.id] = inp.value; });
+    document.querySelectorAll('[data-result-group]').forEach(g => { data.results[g.dataset.resultGroup] = g.dataset.selected || null; });
+    document.querySelectorAll('[data-note]').forEach(inp => { data.notes[inp.dataset.note] = inp.value; });
+    for(let i=1;i<=3;i++){
+      data.fix[i] = {
+        desc: document.querySelector(`[data-fix="${i}"]`).value,
+        deadline: document.querySelector(`[data-fix-deadline="${i}"]`).value,
+        recheck: document.querySelector(`[data-recheck-group="${i}"]`).dataset.selected || null,
+        recheckDate: document.querySelector(`[data-fix-recheck-date="${i}"]`).value
+      };
+    }
+    const activeConc = document.querySelector('.conclusion-pill.active');
+    data.conclusion = activeConc ? activeConc.dataset.conclusion : null;
+
+    if(window.storage){
+      await window.storage.set('danfo-huadu-acceptance', JSON.stringify(data), false);
+      showSaveNote();
+    }
+  }catch(err){ console.error('save failed', err); }
+}
+let noteTimer = null;
+function showSaveNote(){
+  const note = document.getElementById('saveNote');
+  note.style.display = 'block';
+  clearTimeout(noteTimer);
+  noteTimer = setTimeout(() => { note.style.display = 'none'; }, 1500);
+}
+
+async function loadSaved(){
+  try{
+    if(!window.storage) return;
+    const res = await window.storage.get('danfo-huadu-acceptance', false);
+    if(!res || !res.value) return;
+    const data = JSON.parse(res.value);
+    Object.keys(data.fields || {}).forEach(id => { const el = document.getElementById(id); if(el) el.value = data.fields[id]; });
+    Object.keys(data.results || {}).forEach(id => {
+      const val = data.results[id];
+      if(!val) return;
+      const group = document.querySelector(`[data-result-group="${id}"]`);
+      if(group){
+        group.dataset.selected = val;
+        group.querySelectorAll('.pill').forEach(p => p.classList.toggle('active', p.dataset.value === val));
+      }
+    });
+    Object.keys(data.notes || {}).forEach(id => {
+      const el = document.querySelector(`[data-note="${id}"]`);
+      if(el) el.value = data.notes[id];
+    });
+    Object.keys(data.fix || {}).forEach(i => {
+      const rec = data.fix[i];
+      const descEl = document.querySelector(`[data-fix="${i}"]`);
+      const deadlineEl = document.querySelector(`[data-fix-deadline="${i}"]`);
+      const recheckDateEl = document.querySelector(`[data-fix-recheck-date="${i}"]`);
+      if(descEl) descEl.value = rec.desc || '';
+      if(deadlineEl) deadlineEl.value = rec.deadline || '';
+      if(recheckDateEl) recheckDateEl.value = rec.recheckDate || '';
+      if(rec.recheck){
+        const group = document.querySelector(`[data-recheck-group="${i}"]`);
+        if(group){
+          group.dataset.selected = rec.recheck;
+          group.querySelectorAll('.recheck-pill').forEach(p => p.classList.toggle('active', p.dataset.value === rec.recheck));
+        }
+      }
+    });
+    if(data.conclusion){
+      const pill = document.querySelector(`[data-conclusion="${data.conclusion}"]`);
+      if(pill){
+        pill.classList.add('active');
+        if(data.conclusion === 'other') document.getElementById('conclusionOther').classList.add('show');
+      }
+    }
+    document.getElementById('conclusionOther').value = data.conclusionOther || '';
+
+    [['sig-owner', data.sigOwner], ['sig-contractor', data.sigContractor]].forEach(([id, dataUrl]) => {
+      if(!dataUrl) return;
+      const canvas = document.getElementById(id);
+      const img = new Image();
+      img.onload = () => { canvas._ctx.drawImage(img, 0, 0, canvas.width, canvas.height); canvas.dataset.hasInk = "1"; };
+      img.src = dataUrl;
+    });
+    updateProgress();
+  }catch(err){
+    // no saved data yet
+  }
+}
+
+document.body.addEventListener('input', (e) => {
+  if(e.target.matches('input')) scheduleSave();
+});
+
+updateProgress();
+loadSaved();
+</script>
+
+</body>
+</html>
