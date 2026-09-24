@@ -2,12 +2,13 @@
    裝修報價單管理系統 - App Core Logic
    ========================================================================== */
 
-const APP_VERSION = "v1.3.1";
-const APP_BUILD_DATE = "2026-08-12";
+const APP_VERSION = "v1.4.0";
+const APP_BUILD_DATE = "2026-09-10";
 
 // Default Sample Data (Parsed directly from reference file: 報價單_民權東路一段72號八樓.xlsx)
 const SAMPLE_QUOTATION = {
   id: "quote_sample_72_8f",
+  docType: "工程報價單",
   quoteNo: "DQ-20260810-72",
   quoteVersion: "V1",
   customerName: "Vincent",
@@ -31,6 +32,7 @@ const SAMPLE_QUOTATION = {
   enableTax: true,
   discountName: "專案特惠",
   discountAmount: 0,
+  paidAmount: 0,
   
   categories: [
     {
@@ -348,6 +350,9 @@ function toggleTheme() {
    ========================================================================== */
 
 function updateStateFromForm() {
+  const docTypeEl = document.getElementById("docType");
+  if (docTypeEl) currentQuote.docType = docTypeEl.value;
+
   currentQuote.quoteNo = document.getElementById("quoteNo").value;
   const verEl = document.getElementById("quoteVersion");
   if (verEl) currentQuote.quoteVersion = verEl.value;
@@ -368,6 +373,8 @@ function updateStateFromForm() {
   if (discNameEl) currentQuote.discountName = discNameEl.value;
   const discAmtEl = document.getElementById("discountAmount");
   if (discAmtEl) currentQuote.discountAmount = parseFloat(discAmtEl.value) || 0;
+  const paidAmtEl = document.getElementById("paidAmount");
+  if (paidAmtEl) currentQuote.paidAmount = parseFloat(paidAmtEl.value) || 0;
 
   currentQuote.companyName = document.getElementById("companyName").value;
   currentQuote.bankName = document.getElementById("bankName").value;
@@ -382,6 +389,9 @@ function updateStateFromForm() {
 }
 
 function updateFormFromState() {
+  const docTypeEl = document.getElementById("docType");
+  if (docTypeEl) docTypeEl.value = currentQuote.docType || "工程報價單";
+
   document.getElementById("quoteNo").value = currentQuote.quoteNo || "";
   const verEl = document.getElementById("quoteVersion");
   if (verEl) verEl.value = currentQuote.quoteVersion || "V1";
@@ -402,6 +412,12 @@ function updateFormFromState() {
   if (discNameEl) discNameEl.value = currentQuote.discountName || "專案特惠";
   const discAmtEl = document.getElementById("discountAmount");
   if (discAmtEl) discAmtEl.value = currentQuote.discountAmount || 0;
+  const paidAmtEl = document.getElementById("paidAmount");
+  if (paidAmtEl) paidAmtEl.value = currentQuote.paidAmount || 0;
+
+  const isBillingMode = currentQuote.docType === "結帳請款單";
+  const paidGroup = document.getElementById("paidAmountGroup");
+  if (paidGroup) paidGroup.style.display = isBillingMode ? "block" : "none";
   
   document.getElementById("companyName").value = currentQuote.companyName || "";
   document.getElementById("bankName").value = currentQuote.bankName || "";
@@ -448,6 +464,9 @@ function computeTotals() {
   const discountAmount = parseFloat(currentQuote.discountAmount) || 0;
   const finalTotal = Math.max(0, grandTotal - discountAmount);
 
+  const paidAmount = parseFloat(currentQuote.paidAmount) || 0;
+  const balanceDue = Math.max(0, finalTotal - paidAmount);
+
   const totalProfit = finalTotal - totalExpense;
   const profitMargin = finalTotal > 0 ? (totalProfit / finalTotal) * 100 : 0;
 
@@ -462,6 +481,8 @@ function computeTotals() {
     discountName,
     discountAmount,
     finalTotal,
+    paidAmount,
+    balanceDue,
     totalExpense,
     totalProfit,
     profitMargin
@@ -489,6 +510,21 @@ function recalculateCalculations() {
     calcDiscountAmount.textContent = totals.discountAmount > 0 ? `-$${Number(totals.discountAmount).toLocaleString()}` : `$0`;
   }
   if (calcFinalTotal) calcFinalTotal.textContent = formatCurrency(totals.finalTotal);
+
+  const calcPaidAmount = document.getElementById("calcPaidAmount");
+  const calcBalanceDue = document.getElementById("calcBalanceDue");
+  const calcPaidRow = document.getElementById("calcPaidRow");
+  const calcBalanceRow = document.getElementById("calcBalanceRow");
+
+  if (calcPaidAmount) calcPaidAmount.textContent = formatCurrency(totals.paidAmount);
+  if (calcBalanceDue) calcBalanceDue.textContent = formatCurrency(totals.balanceDue);
+
+  const isBillingMode = currentQuote.docType === "結帳請款單";
+  const paidGroup = document.getElementById("paidAmountGroup");
+  if (paidGroup) paidGroup.style.display = isBillingMode ? "block" : "none";
+
+  if (calcPaidRow) calcPaidRow.style.display = isBillingMode ? "flex" : "none";
+  if (calcBalanceRow) calcBalanceRow.style.display = isBillingMode ? "flex" : "none";
 
   // Update Total Actual Expense & Total Profit in Summary Panel
   const calcTotalExpense = document.getElementById("calcTotalExpense");
@@ -1007,6 +1043,9 @@ function renderPreview() {
   const totals = computeTotals();
 
   // Basic info sync
+  const docTitleEl = document.getElementById("prevDocTitle");
+  if (docTitleEl) docTitleEl.textContent = currentQuote.docType || "工程報價單";
+
   document.getElementById("prevCompanyName").textContent = currentQuote.companyName || "樺曏創意設計有限公司";
   document.getElementById("prevCustomerName").textContent = currentQuote.customerName || "—";
   document.getElementById("prevCustomerPhone").textContent = currentQuote.customerPhone || "—";
@@ -1098,6 +1137,19 @@ function renderPreview() {
     prevDiscountAmount.textContent = totals.discountAmount > 0 ? `-$${Number(totals.discountAmount).toLocaleString()}` : `$0`;
   }
   if (prevFinalTotal) prevFinalTotal.textContent = "$" + Number(totals.finalTotal).toLocaleString();
+
+  const prevPaidAmount = document.getElementById("prevPaidAmount");
+  const prevBalanceDue = document.getElementById("prevBalanceDue");
+  const prevPaidRow = document.getElementById("prevPaidRow");
+  const prevBalanceRow = document.getElementById("prevBalanceRow");
+
+  if (prevPaidAmount) prevPaidAmount.textContent = "$" + Number(totals.paidAmount).toLocaleString();
+  if (prevBalanceDue) prevBalanceDue.textContent = "$" + Number(totals.balanceDue).toLocaleString();
+
+  const isBillingMode = currentQuote.docType === "結帳請款單";
+
+  if (prevPaidRow) prevPaidRow.style.display = isBillingMode ? "table-row" : "none";
+  if (prevBalanceRow) prevBalanceRow.style.display = isBillingMode ? "table-row" : "none";
 
   // Terms & Payment Info
   document.getElementById("prevTermsText").textContent = currentQuote.termsText || "";
@@ -1276,6 +1328,7 @@ function renderSavedQuotesList() {
 function createNewQuote() {
   currentQuote = {
     id: "quote_" + Date.now(),
+    docType: "工程報價單",
     quoteNo: "DQ-" + new Date().toISOString().slice(0,10).replace(/-/g, '') + "-01",
     quoteVersion: "V1",
     customerName: "新客戶",
@@ -1296,6 +1349,7 @@ function createNewQuote() {
     enableTax: true,
     discountName: "專案特惠",
     discountAmount: 0,
+    paidAmount: 0,
     categories: [
       {
         id: "cat_" + Date.now(),
@@ -1362,11 +1416,12 @@ function getFormattedExportBaseName() {
   const quoteDate = (currentQuote && currentQuote.quoteDate ? currentQuote.quoteDate : '').trim();
   const decorAddress = (currentQuote && currentQuote.decorAddress ? currentQuote.decorAddress : '').trim();
   const quoteVersion = (currentQuote && currentQuote.quoteVersion ? currentQuote.quoteVersion : '').trim();
+  const docType = (currentQuote && currentQuote.docType ? currentQuote.docType : '工程報價單').trim();
 
-  const parts = [quoteDate, decorAddress, quoteVersion].filter(Boolean);
+  const parts = [quoteDate, decorAddress, quoteVersion, docType].filter(Boolean);
   let baseName = parts.join('_');
   if (!baseName) {
-    baseName = '報價單';
+    baseName = docType;
   }
   return baseName.replace(/[\\/:*?"<>|]/g, '_');
 }
@@ -1534,8 +1589,9 @@ function exportCsvFile() {
   let csvContent = "\uFEFF"; // UTF-8 BOM for Excel Traditional Chinese support
 
   // Client & Project Info Header
-  csvContent += `裝修工程報價單,,,,,,\n`;
-  csvContent += `報價單號,${csvEscape(currentQuote.quoteNo)},報價版號,${csvEscape(currentQuote.quoteVersion || 'V1')},客戶姓名,${csvEscape(currentQuote.customerName)},聯絡電話,${csvEscape(currentQuote.customerPhone)}\n`;
+  const docTitle = currentQuote.docType || "工程報價單";
+  csvContent += `${docTitle},,,,,,\n`;
+  csvContent += `單據種類,${csvEscape(docTitle)},報價單號,${csvEscape(currentQuote.quoteNo)},報價版號,${csvEscape(currentQuote.quoteVersion || 'V1')},客戶姓名,${csvEscape(currentQuote.customerName)},聯絡電話,${csvEscape(currentQuote.customerPhone)}\n`;
   csvContent += `裝修地址,${csvEscape(currentQuote.decorAddress)},建物類型,${csvEscape(currentQuote.propertyType)},報價日期,${csvEscape(currentQuote.quoteDate)}\n`;
   csvContent += `有效天數,${currentQuote.validDays}日,專案備註,${csvEscape(currentQuote.projectMemo)},,\n\n`;
 
@@ -1562,7 +1618,13 @@ function exportCsvFile() {
   csvContent += `營業稅 (5%),${totals.taxFee}\n`;
   csvContent += `報價總額 (含稅),${totals.grandTotal}\n`;
   csvContent += `${csvEscape(totals.discountName)},-${totals.discountAmount}\n`;
-  csvContent += `實收總額 (折後),${totals.finalTotal}\n\n`;
+  csvContent += `實收總額 (折後),${totals.finalTotal}\n`;
+
+  if (currentQuote.docType === "結帳請款單" || totals.paidAmount > 0) {
+    csvContent += `已收金額 (已付工程款),${totals.paidAmount}\n`;
+    csvContent += `結帳尾款 (應收金額),${totals.balanceDue}\n`;
+  }
+  csvContent += `\n`;
 
   // Company & Terms Info
   csvContent += `公司名稱,${csvEscape(currentQuote.companyName)}\n`;
@@ -1583,7 +1645,7 @@ function exportCsvFile() {
     link.click();
     document.body.removeChild(link);
   }
-  showToast(`已成功匯出 CSV 報價單檔案：${filename}`);
+  showToast(`已成功匯出 CSV 檔案：${filename}`);
 }
 
 function csvEscape(str) {
@@ -1621,9 +1683,17 @@ window.addEventListener('afterprint', () => {
   document.title = defaultAppTitle;
 });
 
-function triggerPrint() {
+function triggerPrint(targetDocType) {
+  if (targetDocType && (targetDocType === "結帳請款單" || targetDocType === "工程報價單")) {
+    currentQuote.docType = targetDocType;
+    const docTypeEl = document.getElementById("docType");
+    if (docTypeEl) docTypeEl.value = targetDocType;
+    recalculateCalculations();
+    saveQuoteToLocalStorage();
+  }
   // Ensure mode is split or preview so preview element is rendered
   setAppMode("preview");
+  renderPreview();
   defaultAppTitle = document.title;
   document.title = getExportPdfFileName();
   setTimeout(() => {
