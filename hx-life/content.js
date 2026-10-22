@@ -27,7 +27,7 @@ const SITE_CONTENT = {
   lineUrl: "https://line.me/R/ti/p/@840nsswq",
   instagramLabel: "@ONLY_HXDS",
   instagramUrl: "https://instagram.com/ONLY_HXDS/",
-  email: "hello@example.com",
+  #",
   footerEnglish: "Huaxiang Anjia Interior Design & Renovation Co., Ltd.",
   heroImage: "images/hero.svg",
   detailImage: "HX_Photo/A01_IMG_6102.jpg",
