@@ -12,11 +12,52 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const hero = document.getElementById("hero-image");
   if (hero) { hero.src = SITE_CONTENT.heroImage; }
-  const detail = document.querySelector(".feature-image img");
-  if (detail) { detail.src = SITE_CONTENT.detailImage; }
+
+  const detailImg = document.getElementById("detail-image") || document.querySelector(".feature-image img");
+  const detailImages = Array.isArray(SITE_CONTENT.detailImages) && SITE_CONTENT.detailImages.length
+    ? SITE_CONTENT.detailImages
+    : [SITE_CONTENT.detailImage];
+
+  if (detailImg && detailImages.length) {
+    let currentDetailIdx = 0;
+    const counterEl = document.getElementById("detail-counter");
+    const dotsEl = document.getElementById("detail-dots");
+    const prevBtn = document.querySelector(".slider-prev");
+    const nextBtn = document.querySelector(".slider-next");
+
+    function renderDetailSlide(index) {
+      currentDetailIdx = (index + detailImages.length) % detailImages.length;
+      detailImg.src = detailImages[currentDetailIdx];
+      if (counterEl) {
+        const cur = String(currentDetailIdx + 1).padStart(2, "0");
+        const total = String(detailImages.length).padStart(2, "0");
+        counterEl.textContent = `${cur} / ${total}`;
+      }
+      if (dotsEl) {
+        dotsEl.querySelectorAll(".slider-dot").forEach((dot, i) => {
+          dot.classList.toggle("active", i === currentDetailIdx);
+          dot.setAttribute("aria-selected", String(i === currentDetailIdx));
+        });
+      }
+    }
+
+    if (dotsEl) {
+      dotsEl.innerHTML = detailImages.map((_, i) =>
+        `<button type="button" class="slider-dot${i === 0 ? " active" : ""}" role="tab" aria-label="切換至第 ${i + 1} 張照片" aria-selected="${i === 0}"></button>`
+      ).join("");
+      dotsEl.querySelectorAll(".slider-dot").forEach((dot, i) => {
+        dot.addEventListener("click", () => renderDetailSlide(i));
+      });
+    }
+
+    if (prevBtn) prevBtn.addEventListener("click", () => renderDetailSlide(currentDetailIdx - 1));
+    if (nextBtn) nextBtn.addEventListener("click", () => renderDetailSlide(currentDetailIdx + 1));
+
+    renderDetailSlide(0);
+  }
 
   const linkMap = {
-    phone: "tel:" + SITE_CONTENT.phone.replace(/[^0-9+]/g, ""),
+    phone: SITE_CONTENT.phone ? "tel:" + SITE_CONTENT.phone.replace(/[^0-9+]/g, "") : "",
     website: SITE_CONTENT.website,
     line: SITE_CONTENT.lineUrl,
     instagram: SITE_CONTENT.instagramUrl,
@@ -28,7 +69,13 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   const serviceGrid = document.getElementById("service-grid");
-  serviceGrid.innerHTML = SERVICES.map(s => `<article class="service-card"><span class="service-icon" aria-hidden="true">${escapeHtml(s.icon)}</span><h3>${escapeHtml(s.title)}</h3><p>${escapeHtml(s.description)}</p></article>`).join("");
+  serviceGrid.innerHTML = SERVICES.map(s => {
+    const isImage = /\.(png|jpe?g|svg|webp)$/i.test(s.icon);
+    const iconMarkup = isImage
+      ? `<span class="service-icon"><img class="service-icon-img" src="${escapeHtml(s.icon)}" alt="${escapeHtml(s.title)}"></span>`
+      : `<span class="service-icon" aria-hidden="true">${escapeHtml(s.icon)}</span>`;
+    return `<article class="service-card">${iconMarkup}<h3>${escapeHtml(s.title)}</h3><p>${escapeHtml(s.description)}</p></article>`;
+  }).join("");
 
   const newsGrid = document.getElementById("news-grid");
   newsGrid.innerHTML = NEWS.map(n => `<article class="news-card"><time class="news-date">${escapeHtml(n.date)}</time><h3>${escapeHtml(n.title)}</h3><p>${escapeHtml(n.summary)}</p><span class="news-tag">${escapeHtml(n.tag)}</span></article>`).join("");

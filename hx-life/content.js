@@ -21,26 +21,33 @@ const SITE_CONTENT = {
   featureText: "我們相信家的美好，來自材質、光線、動線與生活習慣之間的和諧。好的設計不必張揚，卻能在每天的使用裡，慢慢感受到它的用心。",
   contactTitle: "一起打造，\\n更適合你的生活。",
   contactText: "告訴我們你的想法，讓我們從一次輕鬆的交流開始。",
-  phone: "0928-575-057",
   website: "https://hx-life.com/",
   address: "台北市信義區永吉路225巷1弄25號",
-  lineLabel: "LINE 官方帳號",
-  lineUrl: "https://line.me/",
+  lineLabel: "@840nsswq",
+  lineUrl: "https://line.me/R/ti/p/@840nsswq",
   instagramLabel: "@ONLY_HXDS",
   instagramUrl: "https://instagram.com/ONLY_HXDS/",
   email: "hello@example.com",
   footerEnglish: "Huaxiang Anjia Interior Design & Renovation Co., Ltd.",
   heroImage: "images/hero.svg",
-  detailImage: "images/detail.svg"
+  detailImage: "HX_Photo/A01_IMG_6102.jpg",
+  detailImages: [
+    "HX_Photo/A01_IMG_6102.jpg",
+    "HX_Photo/B01_IMG_5468.PNG",
+    "HX_Photo/C01_IMG_0256.jpg",
+    "HX_Photo/D01_IMG_5686.jpeg",
+    "HX_Photo/E01_IMG_5478.jpg",
+    "HX_Photo/F01_IMG_9999.jpg"
+  ]
 };
 
 const SERVICES = [
-  { icon: "⌂", title: "軟裝設計", description: "以家具、織品、燈光與色彩，為空間建立完整的生活表情。" },
-  { icon: "☼", title: "空間美學", description: "梳理比例、材質與光線，打造舒服且耐看的居住環境。" },
-  { icon: "⌂", title: "出租增值", description: "從使用情境與市場需求出發，提升空間吸引力與實用性。" },
-  { icon: "▥", title: "老宅翻修", description: "重新檢視生活動線與機能，讓舊空間有新的可能。" },
-  { icon: "⌑", title: "家具選品", description: "依照空間尺寸、風格與預算，挑選合適的家具與物件。" },
-  { icon: "❧", title: "生活風格", description: "從日常習慣出發，整合收納、佈置與生活細節。" }
+  { icon: "images/icon_01.png", title: "軟裝設計", description: "以家具、織品、燈光與色彩，為空間建立完整的生活表情。" },
+  { icon: "images/icon_02.png", title: "空間美學", description: "梳理比例、材質與光線，打造舒服且耐看的居住環境。" },
+  { icon: "images/icon_03.png", title: "出租增值", description: "從使用情境與市場需求出發，提升空間吸引力與實用性。" },
+  { icon: "images/icon_04.png", title: "老宅翻修", description: "重新檢視生活動線與機能，讓舊空間有新的可能。" },
+  { icon: "images/icon_05.png", title: "家具選品", description: "依照空間尺寸、風格與預算，挑選合適的家具與物件。" },
+  { icon: "images/icon_06.png", title: "生活風格", description: "從日常習慣出發，整合收納、佈置與生活細節。" }
 ];
 
 const NEWS = [
