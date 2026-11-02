@@ -19,10 +19,10 @@ const SAMPLE_QUOTATION = {
   validDays: 30,
   projectMemo: "社區清潔費、保證金另計",
   
-  companyName: "樺曏創意設計有限公司",
+  companyName: "樺曏安家室內裝修有限公司",
   bankName: "國泰世華",
   bankBranch: "八德分行",
-  bankAccountName: "樺曏創意設計有限公司",
+  bankAccountName: "樺曏安家室內裝修有限公司",
   bankAccountNo: "077035004991",
   
   termsText: "1. 此報價30日內有效\n2. 訂金預付30%，期中款50%、尾款20%\n3. 工程含一年保固",
