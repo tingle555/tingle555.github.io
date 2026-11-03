@@ -2,8 +2,8 @@
    裝修報價單管理系統 - App Core Logic
    ========================================================================== */
 
-const APP_VERSION = "v1.4.0";
-const APP_BUILD_DATE = "2026-09-10";
+const APP_VERSION = "v1.4.1";
+const APP_BUILD_DATE = "2026-11-04";
 
 // Default Sample Data (Parsed directly from reference file: 報價單_民權東路一段72號八樓.xlsx)
 const SAMPLE_QUOTATION = {
@@ -19,10 +19,10 @@ const SAMPLE_QUOTATION = {
   validDays: 30,
   projectMemo: "社區清潔費、保證金另計",
   
-  companyName: "樺曏安家室內裝修有限公司",
+  companyName: "樺曏創意設計有限公司",
   bankName: "國泰世華",
   bankBranch: "八德分行",
-  bankAccountName: "樺曏安家室內裝修有限公司",
+  bankAccountName: "樺曏創意設計有限公司",
   bankAccountNo: "077035004991",
   
   termsText: "1. 此報價30日內有效\n2. 訂金預付30%，期中款50%、尾款20%\n3. 工程含一年保固",
@@ -124,6 +124,10 @@ const SAMPLE_QUOTATION = {
 
 // Standard Construction Catalog Presets
 const PRESET_ITEMS_CATALOG = [
+  { category: "設計規劃", name: "平面配置規劃與丈量", spec: "含現場丈量與動線規劃", unit: "式", price: 10000 },
+  { category: "設計規劃", name: "3D透視效果圖繪製", spec: "主要空間擬真渲染圖", unit: "張", price: 3500 },
+  { category: "設計規劃", name: "全套施工圖繪製", spec: "含天花/水電/立面大樣施工圖", unit: "式", price: 15000 },
+  
   { category: "拆除&清運", name: "公共空間保護工程", spec: "防潮布、防刮板雙層保護", unit: "式", price: 6000 },
   { category: "拆除&清運", name: "室內舊有天花板/隔間拆除", spec: "含垃圾袋裝整理", unit: "坪", price: 1500 },
   { category: "拆除&清運", name: "廢棄物清運", spec: "3.5噸卡車", unit: "車", price: 4500 },
@@ -501,6 +505,12 @@ function recalculateCalculations() {
   document.getElementById("calcTaxFee").textContent = formatCurrency(totals.taxFee);
   document.getElementById("calcGrandTotal").textContent = formatCurrency(totals.grandTotal);
 
+  const calcGrandTotalLabel = document.getElementById("calcGrandTotalLabel");
+  if (calcGrandTotalLabel) {
+    calcGrandTotalLabel.textContent = totals.taxFee > 0 ? "報價總額 (含稅):" : "報價總額(未稅):";
+  }
+
+  const calcDiscountRow = document.getElementById("calcDiscountRow");
   const calcDiscountName = document.getElementById("calcDiscountName");
   const calcDiscountAmount = document.getElementById("calcDiscountAmount");
   const calcFinalTotal = document.getElementById("calcFinalTotal");
@@ -508,6 +518,9 @@ function recalculateCalculations() {
   if (calcDiscountName) calcDiscountName.textContent = (totals.discountName || "專案特惠") + ":";
   if (calcDiscountAmount) {
     calcDiscountAmount.textContent = totals.discountAmount > 0 ? `-$${Number(totals.discountAmount).toLocaleString()}` : `$0`;
+  }
+  if (calcDiscountRow) {
+    calcDiscountRow.style.display = totals.discountAmount > 0 ? "flex" : "none";
   }
   if (calcFinalTotal) calcFinalTotal.textContent = formatCurrency(totals.finalTotal);
 
@@ -568,6 +581,7 @@ function formatCurrency(amount) {
    ========================================================================== */
 
 const STANDARD_CATEGORIES = [
+  "設計規劃",
   "系統櫃工程",
   "拆除工程",
   "水電工程",
@@ -1046,7 +1060,7 @@ function renderPreview() {
   const docTitleEl = document.getElementById("prevDocTitle");
   if (docTitleEl) docTitleEl.textContent = currentQuote.docType || "工程報價單";
 
-  document.getElementById("prevCompanyName").textContent = currentQuote.companyName || "樺曏安家室內裝修有限公司";
+  document.getElementById("prevCompanyName").textContent = currentQuote.companyName || "樺曏創意設計有限公司";
   document.getElementById("prevCustomerName").textContent = currentQuote.customerName || "—";
   document.getElementById("prevCustomerPhone").textContent = currentQuote.customerPhone || "—";
   document.getElementById("prevDecorAddress").textContent = currentQuote.decorAddress || "—";
@@ -1067,7 +1081,7 @@ function renderPreview() {
 
   document.getElementById("prevProjectMemo").textContent = currentQuote.projectMemo || "無";
 
-  // Render preview table items
+  // Render preview table items (工程項目依原樣完整輸出，包含小計為 0 之項目)
   const tbody = document.getElementById("prevItemsBody");
   tbody.innerHTML = "";
 
@@ -1119,15 +1133,51 @@ function renderPreview() {
     tbody.appendChild(subRow);
   });
 
-  // Summary Table sync
+  // Summary Table sync (最後結算欄位填入 0 時，輸出項目不顯示)
   document.getElementById("prevEngSubtotal").textContent = "$" + Number(totals.engSubtotal).toLocaleString();
-  document.getElementById("prevDesignFee").textContent = "$" + Number(totals.designFee).toLocaleString();
-  document.getElementById("prevServiceRate").textContent = totals.serviceRate;
-  document.getElementById("prevServiceFee").textContent = "$" + Number(totals.serviceFee).toLocaleString();
-  document.getElementById("prevUntaxedTotal").textContent = "$" + Number(totals.untaxedTotal).toLocaleString();
-  document.getElementById("prevTaxFee").textContent = "$" + Number(totals.taxFee).toLocaleString();
+
+  // 設計費：填入 0 時輸出不顯示
+  const prevDesignFeeRow = document.getElementById("prevDesignFeeRow");
+  const prevDesignFee = document.getElementById("prevDesignFee");
+  if (prevDesignFee) prevDesignFee.textContent = "$" + Number(totals.designFee).toLocaleString();
+  if (prevDesignFeeRow) {
+    prevDesignFeeRow.style.display = totals.designFee > 0 ? "table-row" : "none";
+  }
+
+  // 工程服務費 / 監工費：填入 0 時輸出不顯示
+  const prevServiceFeeRow = document.getElementById("prevServiceFeeRow");
+  const prevServiceRate = document.getElementById("prevServiceRate");
+  const prevServiceFee = document.getElementById("prevServiceFee");
+  if (prevServiceRate) prevServiceRate.textContent = totals.serviceRate;
+  if (prevServiceFee) prevServiceFee.textContent = "$" + Number(totals.serviceFee).toLocaleString();
+  if (prevServiceFeeRow) {
+    prevServiceFeeRow.style.display = (totals.serviceFee > 0 && totals.serviceRate > 0) ? "table-row" : "none";
+  }
+
+  // 營業稅 (5%) 與 未稅金額：營業稅為 0 或免開發票時輸出不顯示
+  const prevUntaxedTotalRow = document.getElementById("prevUntaxedTotalRow");
+  const prevTaxFeeRow = document.getElementById("prevTaxFeeRow");
+  const prevUntaxedTotal = document.getElementById("prevUntaxedTotal");
+  const prevTaxFee = document.getElementById("prevTaxFee");
+  const prevGrandTotalLabel = document.getElementById("prevGrandTotalLabel");
+
+  if (prevUntaxedTotal) prevUntaxedTotal.textContent = "$" + Number(totals.untaxedTotal).toLocaleString();
+  if (prevTaxFee) prevTaxFee.textContent = "$" + Number(totals.taxFee).toLocaleString();
+
+  if (totals.taxFee > 0) {
+    if (prevUntaxedTotalRow) prevUntaxedTotalRow.style.display = "table-row";
+    if (prevTaxFeeRow) prevTaxFeeRow.style.display = "table-row";
+    if (prevGrandTotalLabel) prevGrandTotalLabel.textContent = "報價總額 (含稅)";
+  } else {
+    if (prevUntaxedTotalRow) prevUntaxedTotalRow.style.display = "none";
+    if (prevTaxFeeRow) prevTaxFeeRow.style.display = "none";
+    if (prevGrandTotalLabel) prevGrandTotalLabel.textContent = "報價總額(未稅)";
+  }
+
   document.getElementById("prevGrandTotal").textContent = "$" + Number(totals.grandTotal).toLocaleString();
 
+  // 優惠名稱與金額：優惠金額填入 0 時輸出不顯示
+  const prevDiscountRow = document.getElementById("prevDiscountRow");
   const prevDiscountName = document.getElementById("prevDiscountName");
   const prevDiscountAmount = document.getElementById("prevDiscountAmount");
   const prevFinalTotal = document.getElementById("prevFinalTotal");
@@ -1135,6 +1185,9 @@ function renderPreview() {
   if (prevDiscountName) prevDiscountName.textContent = totals.discountName || "專案特惠";
   if (prevDiscountAmount) {
     prevDiscountAmount.textContent = totals.discountAmount > 0 ? `-$${Number(totals.discountAmount).toLocaleString()}` : `$0`;
+  }
+  if (prevDiscountRow) {
+    prevDiscountRow.style.display = totals.discountAmount > 0 ? "table-row" : "none";
   }
   if (prevFinalTotal) prevFinalTotal.textContent = "$" + Number(totals.finalTotal).toLocaleString();
 
@@ -1338,10 +1391,10 @@ function createNewQuote() {
     quoteDate: new Date().toISOString().split('T')[0],
     validDays: 30,
     projectMemo: "",
-    companyName: "樺曏安家室內裝修有限公司",
+    companyName: "樺曏創意設計有限公司",
     bankName: "國泰世華",
     bankBranch: "八德分行",
-    bankAccountName: "樺曏安家室內裝修有限公司",
+    bankAccountName: "樺曏創意設計有限公司",
     bankAccountNo: "077035004991",
     termsText: "1. 此報價30日內有效\n2. 訂金預付30%，期中款50%、尾款20%\n3. 工程含一年保固",
     designFee: 0,
@@ -1609,15 +1662,25 @@ function exportCsvFile() {
     csvContent += `,,【${csvEscape(cat.name)}】 小計,,,,,${cat.subtotal || 0},\n`;
   });
 
-  // Summary Section
+  // Summary Section (最後結算欄位填入 0 時，輸出項目不顯示)
   csvContent += `\n費用摘要,金額($)\n`;
-  csvContent += `工程項目小計,${totals.engSubtotal}\n`;
-  csvContent += `設計費,${totals.designFee}\n`;
-  csvContent += `工程服務費 (${totals.serviceRate}%),${totals.serviceFee}\n`;
-  csvContent += `未稅金額,${totals.untaxedTotal}\n`;
-  csvContent += `營業稅 (5%),${totals.taxFee}\n`;
-  csvContent += `報價總額 (含稅),${totals.grandTotal}\n`;
-  csvContent += `${csvEscape(totals.discountName)},-${totals.discountAmount}\n`;
+  csvContent += `工程小計,${totals.engSubtotal}\n`;
+  if (totals.designFee > 0) {
+    csvContent += `設計費,${totals.designFee}\n`;
+  }
+  if (totals.serviceFee > 0 && totals.serviceRate > 0) {
+    csvContent += `工程服務費 (${totals.serviceRate}%),${totals.serviceFee}\n`;
+  }
+  if (totals.taxFee > 0) {
+    csvContent += `未稅金額,${totals.untaxedTotal}\n`;
+    csvContent += `營業稅 (5%),${totals.taxFee}\n`;
+    csvContent += `報價總額 (含稅),${totals.grandTotal}\n`;
+  } else {
+    csvContent += `報價總額(未稅),${totals.grandTotal}\n`;
+  }
+  if (totals.discountAmount > 0) {
+    csvContent += `${csvEscape(totals.discountName)},-${totals.discountAmount}\n`;
+  }
   csvContent += `實收總額 (折後),${totals.finalTotal}\n`;
 
   if (currentQuote.docType === "結帳請款單" || totals.paidAmount > 0) {
